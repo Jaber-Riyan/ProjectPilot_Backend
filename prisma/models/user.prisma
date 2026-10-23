@@ -1,6 +1,7 @@
 enum Role {
   STUDENT
   MENTOR
+  ADMIN
 }
 
 model User {
@@ -9,6 +10,7 @@ model User {
   email        String   @unique
   passwordHash String
   role         Role     @default(STUDENT)
+  isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -18,5 +20,6 @@ model User {
   feedbacks           Feedback[]   @relation("MentorFeedback")
 
   @@index([role])
+  @@index([email])
   @@map("users")
 }

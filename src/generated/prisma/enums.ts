@@ -37,7 +37,8 @@ export type SubmissionStatus = (typeof SubmissionStatus)[keyof typeof Submission
 
 export const Role = {
   STUDENT: 'STUDENT',
-  MENTOR: 'MENTOR'
+  MENTOR: 'MENTOR',
+  ADMIN: 'ADMIN'
 } as const
 
 export type Role = (typeof Role)[keyof typeof Role]

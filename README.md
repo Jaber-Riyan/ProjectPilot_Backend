@@ -1,6 +1,6 @@
-# ProjectPilot LMS — Backend Architecture & Database-Backed Rate Limiting
+# ProjectPilot LMS — Backend Architecture & Authentication System
 
-Production-ready Express.js + TypeScript REST API foundation, Prisma ORM v7 with Neon PostgreSQL, modular repository-based architecture, and database-backed atomic rate limiting for the ProjectPilot Learning Management System.
+Production-ready Express.js + TypeScript REST API foundation, Prisma ORM v7 with Neon PostgreSQL, modular repository-based architecture, database-backed atomic rate limiting, and secure role-based JWT authentication for the ProjectPilot Learning Management System.
 
 ---
 
@@ -34,6 +34,15 @@ ProjectPilot LMS is a platform designed for students and mentors to manage cours
   - Configurable fail-closed / fail-open failure policies.
   - Expiry cleanup strategy with bounded batch deletions (`npm run db:cleanup-rate-limits`).
   - Liveness probe (`/api/v1/health`) completely exempt from rate limiting.
+- **Phase 5: Secure Authentication, JWT, Argon2id & Role Authorization**
+  - Student self-registration (`POST /api/v1/auth/signup`) strictly enforcing `Role.STUDENT`.
+  - Secure login (`POST /api/v1/auth/login`) with timing-safe, uniform generic `401 Unauthorized` responses.
+  - Password hashing via state-of-the-art **Argon2id** (memory cost 64MB, time cost 3, parallelism 1, 8–128 character bounds).
+  - Short-lived JWT access tokens (HS256, 15m default expiry, claims: `sub`, `email`, `role`).
+  - Strict authentication middleware (`authenticate`) validating token signature, expiration, active account status (`isActive`), and DB existence.
+  - Role-based authorization middleware (`requireRole('STUDENT')`, `requireRole('MENTOR', 'ADMIN')`).
+  - Idempotent seed script (`npm run db:seed`) provisioning initial mentor and administrator accounts safely.
+  - Route-specific database-backed rate limiting on auth endpoints (10 attempts per 15-minute window) without affecting health probes or standard API routes.
 
 ---
 
@@ -46,7 +55,7 @@ backend/
 ├── prisma/
 │   ├── schema.prisma                    # Root Prisma generator & datasource definition
 │   ├── models/                          # Multi-file Prisma schema models & enums
-│   │   ├── user.prisma                  # User model & Role enum
+│   │   ├── user.prisma                  # User model & Role enum (STUDENT, MENTOR, ADMIN)
 │   │   ├── course.prisma                # Course model
 │   │   ├── module.prisma                # Module model
 │   │   ├── content-item.prisma          # ContentItem model & ContentType enum
@@ -54,7 +63,7 @@ backend/
 │   │   ├── submission.prisma            # Submission model & SubmissionStatus enum
 │   │   ├── feedback.prisma              # Feedback model
 │   │   └── rate-limit.prisma            # RateLimitEntry model & indexes
-│   └── migrations/                      # SQL migration history
+│   └── migrations/                      # PostgreSQL migration history
 │
 ├── src/
 │   ├── app.ts                           # Express application factory & middleware pipeline
@@ -63,186 +72,113 @@ backend/
 │   │   └── v1/
 │   │       └── index.ts                 # Versioned API route mount point (/api/v1)
 │   ├── config/
-│   │   ├── env.ts                       # Zod runtime environment validation
+│   │   ├── env.ts                       # Zod runtime environment validation (with defaults)
 │   │   └── app-config.ts                # Centralized application defaults & limits
 │   ├── db/
 │   │   └── prisma.ts                    # Shared lazy-singleton Prisma client (Neon adapter)
 │   ├── errors/
 │   │   └── app-error.ts                 # AppError domain class & JSON response envelopes
 │   ├── lib/
+│   │   ├── async-handler.ts             # Type-safe Express async route wrapper
+│   │   ├── jwt.ts                       # HS256 token signing, verification & claim extraction
 │   │   ├── logger.ts                    # Structured JSON logger with secret redaction
-│   │   └── async-handler.ts             # Type-safe Express async route wrapper
+│   │   └── password.ts                  # Argon2id password hashing and constant-time verification
 │   ├── middleware/
-│   │   ├── error-handler.ts             # Central error handling middleware
+│   │   ├── authenticate.ts              # JWT extraction, verification & DB user resolution
+│   │   ├── authorize.ts                 # Role-based access control (requireRole)
+│   │   ├── error-handler.ts             # Central error handling middleware (Zod & AppError)
 │   │   ├── not-found.ts                 # 404 handler for unmatched routes
-│   │   └── request-context.ts           # Correlation ID (X-Request-Id) and latency logger
+│   │   ├── request-context.ts           # Correlation ID (X-Request-Id) and latency logger
+│   │   └── validate.ts                  # Zod request body/query/params validation middleware
 │   ├── models/
 │   │   ├── index.ts                     # Domain entity type re-exports from Prisma
 │   │   └── README.md                    # Documentation on prisma/models vs src/models
 │   ├── modules/
-│   │   ├── health/                      # Health module (liveness & readiness)
-│   │   │   ├── health.controller.ts
-│   │   │   ├── health.routes.ts
-│   │   │   └── health.service.ts
-│   │   ├── rate-limit/                  # Database-backed rate limiting module
-│   │   │   ├── rate-limit.types.ts      # Policy & decision interfaces
-│   │   │   ├── rate-limit.repository.ts # Concurrency-safe atomic PostgreSQL operations
-│   │   │   ├── rate-limit.service.ts    # Hashing, policy evaluations & failure handling
-│   │   │   ├── rate-limit.middleware.ts # Configurable Express middleware factory
+│   │   ├── auth/                        # Authentication & authorization module
+│   │   │   ├── auth.controller.ts       # HTTP handlers (signup, login, me)
+│   │   │   ├── auth.repository.ts       # User persistence and lookups
+│   │   │   ├── auth.routes.ts           # Auth router with rate limiting and validation
+│   │   │   ├── auth.schema.ts           # Zod schemas (signupSchema, loginSchema)
+│   │   │   ├── auth.service.ts          # Core auth business logic & sanitization
+│   │   │   ├── auth.types.ts            # DTOs and interface definitions
 │   │   │   └── index.ts
-│   │   └── README.md                    # Feature module implementation guide
+│   │   ├── health/                      # Health module (liveness & readiness)
+│   │   └── rate-limit/                  # Database-backed rate limiting module
 │   ├── repositories/
 │   │   ├── base.repository.ts           # Generic type-safe CRUD repository
-│   │   ├── repository.types.ts          # Delegate types & pagination interfaces
-│   │   └── README.md                    # Repository pattern & transaction guide
-│   ├── routes/
-│   │   └── index.ts                     # Central route alias
+│   │   └── repository.types.ts          # Delegate types & pagination interfaces
 │   ├── scripts/
-│   │   ├── verify-db.ts                 # Database connectivity check script (SELECT 1)
-│   │   └── cleanup-rate-limits.ts       # Bounded expired rate-limit cleanup CLI
-│   ├── types/
-│   │   └── express.d.ts                 # Express request augmentation (req.id, startTime)
-│   └── utils/
-│       ├── pagination.ts                # Reusable pagination calculations
-│       ├── slugify.ts                   # String to URL slug converter
-│       └── index.ts
-│
-├── tests/
-│   ├── app.test.ts                      # HTTP pipeline, health, 404 & error tests
-│   ├── base-repository.test.ts          # BaseRepository generic CRUD unit tests
-│   ├── rate-limit.test.ts               # Rate limiter unit, boundary, header & mock tests
-│   ├── rate-limit-db.test.ts            # Live PostgreSQL atomic concurrency tests
-│   └── utils.test.ts                    # Pagination & slugify unit tests
-├── .env.example                         # Environment configuration template
-├── eslint.config.mjs                    # ESLint 9 configuration
-├── package.json                         # NPM scripts & dependencies
-├── prisma.config.ts                     # Prisma v7 configuration (schema: 'prisma')
-├── tsconfig.json                        # Strict TypeScript compiler options
-├── vercel.json                          # Vercel serverless rewrite rules
-└── vitest.config.mts                    # Vitest configuration
+│   │   ├── cleanup-rate-limits.ts       # Bounded batch deletion of expired rate limit entries
+│   │   ├── seed.ts                      # Idempotent mentor and administrator database seeder
+│   │   └── verify-db.ts                 # Direct database connectivity probe
+│   └── types/
+│       └── express.d.ts                 # Express.Request augmentation (req.user, req.id)
+└── tests/
+    ├── app.test.ts                      # Foundation & health check tests
+    ├── auth.test.ts                     # Auth, Argon2id, JWT, Roles & Seed tests (32 tests)
+    ├── base-repository.test.ts          # Generic repository CRUD tests
+    ├── rate-limit-db.test.ts            # PostgreSQL concurrency & expiry tests
+    ├── rate-limit.test.ts               # In-memory rate limiting middleware tests
+    └── utils.test.ts                    # Pagination & utility unit tests
 ```
 
 ---
 
-## 3. Database-Backed Rate Limiting Architecture
+## 3. Authentication & Authorization Specifications
 
-### Concurrency-Safe Atomic Algorithm
+### Endpoints
 
-To eliminate read-then-write race conditions under simultaneous traffic, the rate limiter uses a single atomic PostgreSQL statement with row-level locking:
+| Method | Endpoint | Protection | Description | Rate Limit |
+|---|---|---|---|---|
+| `POST` | `/api/v1/auth/signup` | Public | Registers a new student account | 10 requests / 15 mins |
+| `POST` | `/api/v1/auth/login` | Public | Authenticates student, mentor, or admin | 10 requests / 15 mins |
+| `GET` | `/api/v1/auth/me` | Bearer JWT | Returns current authenticated user profile | General API limit |
 
-```sql
-INSERT INTO "rate_limit_entries" ("id", "key", "count", "windowStartedAt", "expiresAt", "createdAt", "updatedAt")
-VALUES ($1::uuid, $2, 1, $3, $4, $3, $3)
-ON CONFLICT ("key") DO UPDATE
-SET
-  "count" = CASE
-    WHEN "rate_limit_entries"."expiresAt" <= $3 THEN 1
-    ELSE LEAST("rate_limit_entries"."count" + 1, $5 + 1)
-  END,
-  "windowStartedAt" = CASE
-    WHEN "rate_limit_entries"."expiresAt" <= $3 THEN $3
-    ELSE "rate_limit_entries"."windowStartedAt"
-  END,
-  "expiresAt" = CASE
-    WHEN "rate_limit_entries"."expiresAt" <= $3 THEN $4
-    ELSE "rate_limit_entries"."expiresAt"
-  END,
-  "updatedAt" = $3
-RETURNING
-  "id",
-  "key",
-  "count",
-  "windowStartedAt",
-  "expiresAt";
-```
+### Security Guarantees
 
-#### Why Concurrent Requests Cannot Bypass the Limit:
-1. **Row-Level Locking**: PostgreSQL's `INSERT ... ON CONFLICT DO UPDATE` locks the target row during evaluation. Simultaneous requests arriving at the exact same millisecond are serialized by the database engine.
-2. **Atomic Window Expiry**: If `expiresAt <= now`, the count resets to `1` and a new window begins atomically.
-3. **Atomic Increment**: If the window is still active (`expiresAt > now`), `count` increments by 1.
-4. **Zero Overflow**: `LEAST(count + 1, maxRequests + 1)` prevents integer overflow during denial-of-service attempts.
+1. **Privilege Escalation Prevention**:
+   - The public signup endpoint strictly hardcodes `role: Role.STUDENT`.
+   - Any client-supplied `role` parameter in the request payload is stripped and ignored.
+2. **Timing-Safe Generic Login Failures**:
+   - Attempting to log in with an unregistered email returns HTTP 401 with `INVALID_CREDENTIALS` ("Invalid email or password").
+   - Attempting to log in with an incorrect password returns the identical HTTP 401 and code, completely preventing user enumeration.
+3. **Deactivated Accounts**:
+   - When `isActive: false`, login attempts are rejected with HTTP 401 `ACCOUNT_DEACTIVATED`.
+   - The `authenticate` middleware checks `user.isActive` against the live database on every protected request, instantly revoking access if an account is disabled.
+4. **Password Security**:
+   - Algorithm: **Argon2id** (`type: argon2.argon2id`)
+   - Parameters: Memory cost: 65,536 KB (64 MB), Time cost: 3 iterations, Parallelism: 1 thread.
+   - Length limits: Minimum 8 characters, maximum 128 characters.
+   - Plaintext passwords and password hashes are never logged and never included in API response envelopes.
+5. **JSON Web Tokens (JWT)**:
+   - Algorithm: `HS256` (HMAC SHA-256)
+   - Secret: Validated at startup via `JWT_SECRET` (minimum 32 characters in production).
+   - Lifetime: 15 minutes by default (`JWT_EXPIRES_IN`).
+   - Claims: `sub` (User ID), `email`, `role`, `name`.
+6. **Role-Based Authorization**:
+   - Middleware: `requireRole(Role.ADMIN)` or `requireRole(Role.MENTOR, Role.ADMIN)`.
+   - Returns HTTP 403 `FORBIDDEN` ("You do not have permission to access this resource") when the user lacks required roles.
 
-### Key Generation & Privacy Protection
+---
 
-Rate limit keys are formed as:
-```text
-<prefix>:<sha256(normalized_client_identifier)>
-```
-- Client identifiers (e.g. `req.ip` via `trust proxy`) are hashed with SHA-256 before database insertion.
-- **Privacy Guarantee**: Raw IP addresses and PII are never stored in PostgreSQL or logged.
-- Key prefixes isolate distinct rate limit buckets (e.g. `api-v1:...`, `auth:login:...`, `submissions:...`).
+## 4. Database Seeding (`npm run db:seed`)
 
-### Response Headers Emitted
+The backend includes an idempotent seeding script to provision initial administrative and mentor accounts without risking data corruption or duplicates:
 
-| Header | Description | Example |
-|---|---|---|
-| `RateLimit-Limit` | Configured maximum requests for the window | `100` |
-| `RateLimit-Remaining` | Remaining requests allowed in current window | `94` |
-| `RateLimit-Reset` | Epoch timestamp (in seconds) when window resets | `1700000120` |
-| `Retry-After` *(only on 429)* | Seconds client must wait before retrying | `120` |
-
-### Blocked Response Format (`HTTP 429 Too Many Requests`)
-
-```json
-{
-  "success": false,
-  "error": {
-    "code": "TOO_MANY_REQUESTS",
-    "message": "Too many requests. Please try again after 2 minutes."
-  }
-}
-```
-
-### Route-Level Usage Examples
-
-```typescript
-import { createRateLimiter } from '../modules/rate-limit';
-
-// 1. Strict Limiter for Login/Auth Endpoints (5 requests per 15 minutes)
-authRouter.post(
-  '/login',
-  createRateLimiter({
-    windowMs: 15 * 60 * 1000,
-    maxRequests: 5,
-    keyPrefix: 'auth:login',
-    customMessage: 'Too many login attempts. Please try again after 15 minutes.',
-  }),
-  loginController
-);
-
-// 2. Custom Key Generator (e.g. Rate limit by authenticated User ID instead of IP)
-submissionRouter.post(
-  '/submit',
-  createRateLimiter({
-    windowMs: 60 * 1000,
-    maxRequests: 3,
-    keyPrefix: 'assignment:submit',
-    keyGenerator: (req) => req.user?.id || req.ip,
-  }),
-  submitController
-);
-```
-
-### Expiry Cleanup Strategy
-
-In addition to lazy in-request expiry resets, expired entries are cleaned up periodically using bounded batch deletions:
 ```bash
-npm run db:cleanup-rate-limits
+npm run db:seed
 ```
-- Uses indexed `expiresAt` column to avoid table-wide locks.
-- Bounded by `RATE_LIMIT_CLEANUP_BATCH_SIZE` (default 1000 rows).
-- Suitable for scheduled serverless triggers (e.g. Vercel Cron, AWS EventBridge, or GitHub Actions).
 
-### Database Failure Policy
-
-When the database is unreachable:
-- **`failClosed: true` (Default)**: Returns HTTP 500 `RATE_LIMIT_ERROR` to protect sensitive endpoints from abuse during database downtime. Does not leak connection strings or SQL queries.
-- **`failClosed: false`**: Permits the request to continue with fallback metrics (useful for non-critical informational endpoints).
-- **Liveness Probe**: `/api/v1/health` is mounted before the rate limiter and is 100% exempt from rate limiting.
+### Seed Behavior & Idempotency:
+- Reads credentials from environment variables (`SEED_MENTOR_EMAIL`, `SEED_MENTOR_PASSWORD`, `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`).
+- Checks if the user already exists in PostgreSQL before creating.
+- If not found, securely hashes the password with Argon2id and creates the user with the respective role (`Role.MENTOR` or `Role.ADMIN`).
+- If the account already exists, confirms role permissions and active status without duplicating records.
+- Plaintext passwords are never logged to console or logs.
 
 ---
 
-## 4. Environment Variables Reference
+## 5. Environment Variables Reference
 
 | Variable | Type | Default | Description |
 |---|---|---|---|
@@ -255,10 +191,16 @@ When the database is unreachable:
 | `RATE_LIMIT_WINDOW_MS` | `number` | `120000` (2 mins) | Default rate limit window in milliseconds |
 | `RATE_LIMIT_MAX_REQUESTS` | `number` | `100` | Default maximum requests allowed per window |
 | `RATE_LIMIT_CLEANUP_BATCH_SIZE` | `number` | `1000` | Maximum rows deleted in a single cleanup batch |
+| `JWT_SECRET` | `string` | `...dev_secret...` | HMAC secret for signing JWTs (min 32 chars in prod) |
+| `JWT_EXPIRES_IN` | `string` | `'15m'` | Expiration duration for access tokens |
+| `SEED_MENTOR_EMAIL` | `string` | `'mentor@projectpilot.dev'` | Default mentor email for seeding |
+| `SEED_MENTOR_PASSWORD` | `string` | `'MentorSecret2026!'` | Default mentor password for seeding |
+| `SEED_ADMIN_EMAIL` | `string` | `'admin@projectpilot.dev'` | Default admin email for seeding |
+| `SEED_ADMIN_PASSWORD` | `string` | `'AdminSecret2026!'` | Default admin password for seeding |
 
 ---
 
-## 5. Development & Production Commands
+## 6. Development & Production Commands
 
 | Command | Action |
 |---|---|
@@ -267,7 +209,8 @@ When the database is unreachable:
 | `npm start` | Executes compiled production server (`node dist/server.js`) |
 | `npm run typecheck` | Validates TypeScript types across the project (`tsc --noEmit`) |
 | `npm run lint` | Runs ESLint across the codebase |
-| `npm test` | Runs all Vitest test suites (39 tests) |
+| `npm test` | Runs all Vitest test suites (71 tests across 6 files) |
+| `npm run db:seed` | Idempotently provisions initial mentor and admin accounts |
 | `npm run prisma:generate` | Generates Prisma v7 Client into `src/generated/prisma` |
 | `npm run prisma:validate` | Validates multi-file schemas in `prisma/` against `prisma.config.ts` |
 | `npm run prisma:migrate:deploy` | Applies pending migrations in production / CI |
@@ -276,7 +219,7 @@ When the database is unreachable:
 
 ---
 
-## 6. Health Endpoints
+## 7. Health Endpoints
 
 - **Liveness Probe (`GET /api/v1/health`)**:
   - Always exempt from rate limiting.
@@ -287,7 +230,7 @@ When the database is unreachable:
 
 ---
 
-## 7. Vercel Serverless Deployment
+## 8. Vercel Serverless Deployment
 
 The project is structured for native Vercel deployment:
 - Entry point: [`api/index.ts`](file:///C:/Currently%20Working/PHT/Backend/api/index.ts) exports the listener-free Express `app`.

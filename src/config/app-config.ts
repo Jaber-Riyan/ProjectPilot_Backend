@@ -27,6 +27,17 @@ export interface AppConfig {
     defaultMaxRequests: number;
     cleanupBatchSize: number;
   };
+  jwt: {
+    secret: string;
+    expiresIn: string;
+  };
+  auth: {
+    rateLimit: {
+      windowMs: number;
+      maxLoginRequests: number;
+      maxSignupRequests: number;
+    };
+  };
 }
 
 export const appConfig: AppConfig = {
@@ -55,5 +66,16 @@ export const appConfig: AppConfig = {
     defaultWindowMs: env.RATE_LIMIT_WINDOW_MS,
     defaultMaxRequests: env.RATE_LIMIT_MAX_REQUESTS,
     cleanupBatchSize: env.RATE_LIMIT_CLEANUP_BATCH_SIZE,
+  },
+  jwt: {
+    secret: env.JWT_SECRET,
+    expiresIn: env.JWT_EXPIRES_IN,
+  },
+  auth: {
+    rateLimit: {
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      maxLoginRequests: 10,
+      maxSignupRequests: 10,
+    },
   },
 };
