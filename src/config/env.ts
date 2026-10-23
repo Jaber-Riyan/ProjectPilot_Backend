@@ -14,18 +14,41 @@ const envSchema = z
       .min(1, 'PORT must be at least 1')
       .max(65535, 'PORT must be at most 65535')
       .default(5000),
-    DATABASE_URL: z.string().min(1, 'DATABASE_URL cannot be empty').optional(),
-    DIRECT_URL: z.string().min(1, 'DIRECT_URL cannot be empty').optional(),
+    DATABASE_URL: z
+      .string()
+      .min(1, 'DATABASE_URL cannot be empty')
+      .refine(
+        (val) => /^postgres(ql)?:\/\//.test(val),
+        'DATABASE_URL must be a valid PostgreSQL connection URL'
+      )
+      .optional(),
+    DIRECT_URL: z
+      .string()
+      .min(1, 'DIRECT_URL cannot be empty')
+      .refine(
+        (val) => /^postgres(ql)?:\/\//.test(val),
+        'DIRECT_URL must be a valid PostgreSQL connection URL'
+      )
+      .optional(),
     CORS_ORIGIN: z.string().default('http://localhost:3000'),
   })
   .superRefine((data, ctx) => {
     // In production, database connection is strictly required
-    if (data.NODE_ENV === 'production' && !data.DATABASE_URL) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'DATABASE_URL is required in production',
-        path: ['DATABASE_URL'],
-      });
+    if (data.NODE_ENV === 'production') {
+      if (!data.DATABASE_URL) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'DATABASE_URL is required in production',
+          path: ['DATABASE_URL'],
+        });
+      }
+      if (!data.DIRECT_URL) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'DIRECT_URL is required in production for Prisma CLI and migrations',
+          path: ['DIRECT_URL'],
+        });
+      }
     }
   });
 

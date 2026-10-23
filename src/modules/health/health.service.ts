@@ -1,4 +1,5 @@
 import { env } from '../../config/env';
+import { checkDatabaseConnection } from '../../db/prisma';
 
 export interface HealthLivenessData {
   status: 'ok';
@@ -12,8 +13,10 @@ export interface HealthReadinessData {
   status: 'ok' | 'degraded';
   services: {
     http: 'up';
-    database: 'not_configured_phase_1' | 'connected' | 'disconnected';
+    database: 'connected' | 'disconnected' | 'not_configured';
   };
+  latencyMs?: number;
+  error?: string;
   timestamp: string;
 }
 
@@ -29,15 +32,41 @@ export class HealthService {
   }
 
   async getReadiness(): Promise<HealthReadinessData> {
-    // In Phase 1, database connectivity is not yet implemented.
-    // We report the HTTP service as up and database as Phase 1 placeholder.
+    const timestamp = new Date().toISOString();
+
+    if (!env.DATABASE_URL) {
+      return {
+        status: 'degraded',
+        services: {
+          http: 'up',
+          database: 'not_configured',
+        },
+        timestamp,
+      };
+    }
+
+    const check = await checkDatabaseConnection();
+
+    if (check.connected) {
+      return {
+        status: 'ok',
+        services: {
+          http: 'up',
+          database: 'connected',
+        },
+        latencyMs: check.latencyMs,
+        timestamp,
+      };
+    }
+
     return {
-      status: 'ok',
+      status: 'degraded',
       services: {
         http: 'up',
-        database: 'not_configured_phase_1',
+        database: 'disconnected',
       },
-      timestamp: new Date().toISOString(),
+      error: check.error,
+      timestamp,
     };
   }
 }

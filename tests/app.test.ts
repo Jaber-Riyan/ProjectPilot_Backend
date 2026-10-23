@@ -1,17 +1,23 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, afterAll } from 'vitest';
 import request from 'supertest';
 import { app } from '../src/app';
+import { disconnectDatabase } from '../src/db/prisma';
 
 describe('ProjectPilot LMS - Backend Foundation Tests', () => {
+  afterAll(async () => {
+    await disconnectDatabase();
+  });
+
   describe('Application Initialization', () => {
-    it('should be importable without automatically binding or listening to a network port', () => {
-      // The Express application instance should exist
+    it('should be importable without automatically binding to a network port', () => {
       expect(app).toBeDefined();
       expect(typeof app).toBe('function');
-      // Verify app does not have a listening HTTP server attached
-      // In Express, when app.listen() is called, it returns an http.Server instance.
-      // app itself is a request listener function.
       expect((app as unknown as { listening?: boolean }).listening).toBeUndefined();
+    });
+
+    it('should not automatically connect to the database on import', () => {
+      // Global connection pool should not have active connected clients purely upon import
+      expect(globalThis.__prismaClient).toBeUndefined();
     });
   });
 
@@ -35,22 +41,19 @@ describe('ProjectPilot LMS - Backend Foundation Tests', () => {
       });
     });
 
-    it('GET /api/v1/health/ready should return 200 with readiness details', async () => {
+    it('GET /api/v1/health/ready should return readiness details and status', async () => {
       const res = await request(app).get('/api/v1/health/ready');
 
-      expect(res.status).toBe(200);
+      // 200 when database is reachable, 503 when offline/unconfigured
+      expect([200, 503]).toContain(res.status);
       expect(res.headers['content-type']).toMatch(/json/);
-      expect(res.body).toEqual({
-        success: true,
-        data: expect.objectContaining({
-          status: 'ok',
-          services: {
-            http: 'up',
-            database: 'not_configured_phase_1',
-          },
-          timestamp: expect.any(String),
-        }),
-      });
+      expect(res.body.data).toBeDefined();
+      expect(res.body.data.services).toEqual(
+        expect.objectContaining({
+          http: 'up',
+          database: expect.any(String),
+        })
+      );
     });
   });
 

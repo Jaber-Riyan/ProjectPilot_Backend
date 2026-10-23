@@ -3,7 +3,7 @@ import tseslint from 'typescript-eslint';
 
 export default [
   {
-    ignores: ['dist/**', 'node_modules/**', 'coverage/**', 'powershell.bat'],
+    ignores: ['dist/**', 'node_modules/**', 'coverage/**', 'powershell.bat', 'src/generated/**'],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,

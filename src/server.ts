@@ -2,6 +2,7 @@ import { Server } from 'http';
 import { app } from './app';
 import { env } from './config/env';
 import { logger } from './lib/logger';
+import { disconnectDatabase } from './db/prisma';
 
 let server: Server | null = null;
 let isShuttingDown = false;
@@ -25,11 +26,12 @@ function startServer(): void {
 
     if (server) {
       // Stop accepting new connections
-      server.close((err) => {
+      server.close(async (err) => {
         if (err) {
           logger.error('Error while closing HTTP server', { error: err.message });
           process.exit(1);
         }
+        await disconnectDatabase();
         logger.info('HTTP server closed successfully.');
         process.exit(0);
       });

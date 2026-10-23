@@ -1,12 +1,170 @@
-// ProjectPilot LMS - Prisma Schema
-// Detailed data models, relations, and migrations will be introduced in Phase 2.
-
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
+}
+
+enum Role {
+  STUDENT
+  MENTOR
+}
+
+enum ContentType {
+  VIDEO
+  TEXT
+  LINK
+}
+
+enum SubmissionPolicy {
+  ONE_TIME
+  RESUBMITTABLE
+}
+
+enum SubmissionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(STUDENT)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relationships
+  submissions         Submission[] @relation("StudentSubmissions")
+  reviewedSubmissions Submission[] @relation("MentorReviews")
+  feedbacks           Feedback[]   @relation("MentorFeedback")
+
+  @@index([role])
+  @@map("users")
+}
+
+model Course {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String
+  slug        String   @unique
+  description String?  @db.Text
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relationships
+  modules Module[]
+
+  @@index([isPublished])
+  @@map("courses")
+}
+
+model Module {
+  id          String   @id @default(uuid()) @db.Uuid
+  courseId    String   @db.Uuid
+  title       String
+  description String?  @db.Text
+  order       Int
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relationships
+  course       Course        @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  contentItems ContentItem[]
+  assignments  Assignment[]
+
+  @@unique([courseId, order])
+  @@index([courseId])
+  @@map("modules")
+}
+
+model ContentItem {
+  id        String      @id @default(uuid()) @db.Uuid
+  moduleId  String      @db.Uuid
+  type      ContentType
+  title     String
+  body      String?     @db.Text
+  url       String?
+  order     Int
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  // Relationships
+  module Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  @@unique([moduleId, order])
+  @@index([moduleId])
+  @@map("content_items")
+}
+
+model Assignment {
+  id               String           @id @default(uuid()) @db.Uuid
+  moduleId         String           @db.Uuid
+  title            String
+  instructions     String           @db.Text
+  submissionPolicy SubmissionPolicy @default(ONE_TIME)
+  isPublished      Boolean          @default(false)
+  dueAt            DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  // Relationships
+  module      Module       @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  submissions Submission[]
+
+  @@index([moduleId])
+  @@index([isPublished])
+  @@map("assignments")
+}
+
+model Submission {
+  id            String           @id @default(uuid()) @db.Uuid
+  assignmentId  String           @db.Uuid
+  studentId     String           @db.Uuid
+  attemptNumber Int              @default(1)
+  projectName   String
+  repoUrl       String
+  liveUrl       String?
+  description   String?          @db.Text
+  status        SubmissionStatus @default(PENDING)
+  reviewedById  String?          @db.Uuid
+  reviewedAt    DateTime?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  // Relationships - Protect student work and review history with Restrict
+  assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: Restrict)
+  student    User       @relation("StudentSubmissions", fields: [studentId], references: [id], onDelete: Restrict)
+  reviewedBy User?      @relation("MentorReviews", fields: [reviewedById], references: [id], onDelete: SetNull)
+  feedbacks  Feedback[]
+
+  @@unique([assignmentId, studentId, attemptNumber])
+  @@index([studentId])
+  @@index([assignmentId])
+  @@index([status])
+  @@index([reviewedById])
+  @@index([assignmentId, status])
+  @@map("submissions")
+}
+
+model Feedback {
+  id           String   @id @default(uuid()) @db.Uuid
+  submissionId String   @db.Uuid
+  mentorId     String   @db.Uuid
+  comment      String   @db.Text
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relationships
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  mentor     User       @relation("MentorFeedback", fields: [mentorId], references: [id], onDelete: Restrict)
+
+  @@index([submissionId])
+  @@index([mentorId])
+  @@map("feedbacks")
 }
