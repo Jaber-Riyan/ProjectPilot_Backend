@@ -304,16 +304,6 @@ export type FeedbackUncheckedUpdateManyInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type FeedbackListRelationFilter = {
-  every?: Prisma.FeedbackWhereInput
-  some?: Prisma.FeedbackWhereInput
-  none?: Prisma.FeedbackWhereInput
-}
-
-export type FeedbackOrderByRelationAggregateInput = {
-  _count?: Prisma.SortOrder
-}
-
 export type FeedbackCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   submissionId?: Prisma.SortOrder
@@ -341,46 +331,14 @@ export type FeedbackMinOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
 }
 
-export type FeedbackCreateNestedManyWithoutMentorInput = {
-  create?: Prisma.XOR<Prisma.FeedbackCreateWithoutMentorInput, Prisma.FeedbackUncheckedCreateWithoutMentorInput> | Prisma.FeedbackCreateWithoutMentorInput[] | Prisma.FeedbackUncheckedCreateWithoutMentorInput[]
-  connectOrCreate?: Prisma.FeedbackCreateOrConnectWithoutMentorInput | Prisma.FeedbackCreateOrConnectWithoutMentorInput[]
-  createMany?: Prisma.FeedbackCreateManyMentorInputEnvelope
-  connect?: Prisma.FeedbackWhereUniqueInput | Prisma.FeedbackWhereUniqueInput[]
+export type FeedbackListRelationFilter = {
+  every?: Prisma.FeedbackWhereInput
+  some?: Prisma.FeedbackWhereInput
+  none?: Prisma.FeedbackWhereInput
 }
 
-export type FeedbackUncheckedCreateNestedManyWithoutMentorInput = {
-  create?: Prisma.XOR<Prisma.FeedbackCreateWithoutMentorInput, Prisma.FeedbackUncheckedCreateWithoutMentorInput> | Prisma.FeedbackCreateWithoutMentorInput[] | Prisma.FeedbackUncheckedCreateWithoutMentorInput[]
-  connectOrCreate?: Prisma.FeedbackCreateOrConnectWithoutMentorInput | Prisma.FeedbackCreateOrConnectWithoutMentorInput[]
-  createMany?: Prisma.FeedbackCreateManyMentorInputEnvelope
-  connect?: Prisma.FeedbackWhereUniqueInput | Prisma.FeedbackWhereUniqueInput[]
-}
-
-export type FeedbackUpdateManyWithoutMentorNestedInput = {
-  create?: Prisma.XOR<Prisma.FeedbackCreateWithoutMentorInput, Prisma.FeedbackUncheckedCreateWithoutMentorInput> | Prisma.FeedbackCreateWithoutMentorInput[] | Prisma.FeedbackUncheckedCreateWithoutMentorInput[]
-  connectOrCreate?: Prisma.FeedbackCreateOrConnectWithoutMentorInput | Prisma.FeedbackCreateOrConnectWithoutMentorInput[]
-  upsert?: Prisma.FeedbackUpsertWithWhereUniqueWithoutMentorInput | Prisma.FeedbackUpsertWithWhereUniqueWithoutMentorInput[]
-  createMany?: Prisma.FeedbackCreateManyMentorInputEnvelope
-  set?: Prisma.FeedbackWhereUniqueInput | Prisma.FeedbackWhereUniqueInput[]
-  disconnect?: Prisma.FeedbackWhereUniqueInput | Prisma.FeedbackWhereUniqueInput[]
-  delete?: Prisma.FeedbackWhereUniqueInput | Prisma.FeedbackWhereUniqueInput[]
-  connect?: Prisma.FeedbackWhereUniqueInput | Prisma.FeedbackWhereUniqueInput[]
-  update?: Prisma.FeedbackUpdateWithWhereUniqueWithoutMentorInput | Prisma.FeedbackUpdateWithWhereUniqueWithoutMentorInput[]
-  updateMany?: Prisma.FeedbackUpdateManyWithWhereWithoutMentorInput | Prisma.FeedbackUpdateManyWithWhereWithoutMentorInput[]
-  deleteMany?: Prisma.FeedbackScalarWhereInput | Prisma.FeedbackScalarWhereInput[]
-}
-
-export type FeedbackUncheckedUpdateManyWithoutMentorNestedInput = {
-  create?: Prisma.XOR<Prisma.FeedbackCreateWithoutMentorInput, Prisma.FeedbackUncheckedCreateWithoutMentorInput> | Prisma.FeedbackCreateWithoutMentorInput[] | Prisma.FeedbackUncheckedCreateWithoutMentorInput[]
-  connectOrCreate?: Prisma.FeedbackCreateOrConnectWithoutMentorInput | Prisma.FeedbackCreateOrConnectWithoutMentorInput[]
-  upsert?: Prisma.FeedbackUpsertWithWhereUniqueWithoutMentorInput | Prisma.FeedbackUpsertWithWhereUniqueWithoutMentorInput[]
-  createMany?: Prisma.FeedbackCreateManyMentorInputEnvelope
-  set?: Prisma.FeedbackWhereUniqueInput | Prisma.FeedbackWhereUniqueInput[]
-  disconnect?: Prisma.FeedbackWhereUniqueInput | Prisma.FeedbackWhereUniqueInput[]
-  delete?: Prisma.FeedbackWhereUniqueInput | Prisma.FeedbackWhereUniqueInput[]
-  connect?: Prisma.FeedbackWhereUniqueInput | Prisma.FeedbackWhereUniqueInput[]
-  update?: Prisma.FeedbackUpdateWithWhereUniqueWithoutMentorInput | Prisma.FeedbackUpdateWithWhereUniqueWithoutMentorInput[]
-  updateMany?: Prisma.FeedbackUpdateManyWithWhereWithoutMentorInput | Prisma.FeedbackUpdateManyWithWhereWithoutMentorInput[]
-  deleteMany?: Prisma.FeedbackScalarWhereInput | Prisma.FeedbackScalarWhereInput[]
+export type FeedbackOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type FeedbackCreateNestedManyWithoutSubmissionInput = {
@@ -425,58 +383,46 @@ export type FeedbackUncheckedUpdateManyWithoutSubmissionNestedInput = {
   deleteMany?: Prisma.FeedbackScalarWhereInput | Prisma.FeedbackScalarWhereInput[]
 }
 
-export type FeedbackCreateWithoutMentorInput = {
-  id?: string
-  comment: string
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  submission: Prisma.SubmissionCreateNestedOneWithoutFeedbacksInput
+export type FeedbackCreateNestedManyWithoutMentorInput = {
+  create?: Prisma.XOR<Prisma.FeedbackCreateWithoutMentorInput, Prisma.FeedbackUncheckedCreateWithoutMentorInput> | Prisma.FeedbackCreateWithoutMentorInput[] | Prisma.FeedbackUncheckedCreateWithoutMentorInput[]
+  connectOrCreate?: Prisma.FeedbackCreateOrConnectWithoutMentorInput | Prisma.FeedbackCreateOrConnectWithoutMentorInput[]
+  createMany?: Prisma.FeedbackCreateManyMentorInputEnvelope
+  connect?: Prisma.FeedbackWhereUniqueInput | Prisma.FeedbackWhereUniqueInput[]
 }
 
-export type FeedbackUncheckedCreateWithoutMentorInput = {
-  id?: string
-  submissionId: string
-  comment: string
-  createdAt?: Date | string
-  updatedAt?: Date | string
+export type FeedbackUncheckedCreateNestedManyWithoutMentorInput = {
+  create?: Prisma.XOR<Prisma.FeedbackCreateWithoutMentorInput, Prisma.FeedbackUncheckedCreateWithoutMentorInput> | Prisma.FeedbackCreateWithoutMentorInput[] | Prisma.FeedbackUncheckedCreateWithoutMentorInput[]
+  connectOrCreate?: Prisma.FeedbackCreateOrConnectWithoutMentorInput | Prisma.FeedbackCreateOrConnectWithoutMentorInput[]
+  createMany?: Prisma.FeedbackCreateManyMentorInputEnvelope
+  connect?: Prisma.FeedbackWhereUniqueInput | Prisma.FeedbackWhereUniqueInput[]
 }
 
-export type FeedbackCreateOrConnectWithoutMentorInput = {
-  where: Prisma.FeedbackWhereUniqueInput
-  create: Prisma.XOR<Prisma.FeedbackCreateWithoutMentorInput, Prisma.FeedbackUncheckedCreateWithoutMentorInput>
+export type FeedbackUpdateManyWithoutMentorNestedInput = {
+  create?: Prisma.XOR<Prisma.FeedbackCreateWithoutMentorInput, Prisma.FeedbackUncheckedCreateWithoutMentorInput> | Prisma.FeedbackCreateWithoutMentorInput[] | Prisma.FeedbackUncheckedCreateWithoutMentorInput[]
+  connectOrCreate?: Prisma.FeedbackCreateOrConnectWithoutMentorInput | Prisma.FeedbackCreateOrConnectWithoutMentorInput[]
+  upsert?: Prisma.FeedbackUpsertWithWhereUniqueWithoutMentorInput | Prisma.FeedbackUpsertWithWhereUniqueWithoutMentorInput[]
+  createMany?: Prisma.FeedbackCreateManyMentorInputEnvelope
+  set?: Prisma.FeedbackWhereUniqueInput | Prisma.FeedbackWhereUniqueInput[]
+  disconnect?: Prisma.FeedbackWhereUniqueInput | Prisma.FeedbackWhereUniqueInput[]
+  delete?: Prisma.FeedbackWhereUniqueInput | Prisma.FeedbackWhereUniqueInput[]
+  connect?: Prisma.FeedbackWhereUniqueInput | Prisma.FeedbackWhereUniqueInput[]
+  update?: Prisma.FeedbackUpdateWithWhereUniqueWithoutMentorInput | Prisma.FeedbackUpdateWithWhereUniqueWithoutMentorInput[]
+  updateMany?: Prisma.FeedbackUpdateManyWithWhereWithoutMentorInput | Prisma.FeedbackUpdateManyWithWhereWithoutMentorInput[]
+  deleteMany?: Prisma.FeedbackScalarWhereInput | Prisma.FeedbackScalarWhereInput[]
 }
 
-export type FeedbackCreateManyMentorInputEnvelope = {
-  data: Prisma.FeedbackCreateManyMentorInput | Prisma.FeedbackCreateManyMentorInput[]
-  skipDuplicates?: boolean
-}
-
-export type FeedbackUpsertWithWhereUniqueWithoutMentorInput = {
-  where: Prisma.FeedbackWhereUniqueInput
-  update: Prisma.XOR<Prisma.FeedbackUpdateWithoutMentorInput, Prisma.FeedbackUncheckedUpdateWithoutMentorInput>
-  create: Prisma.XOR<Prisma.FeedbackCreateWithoutMentorInput, Prisma.FeedbackUncheckedCreateWithoutMentorInput>
-}
-
-export type FeedbackUpdateWithWhereUniqueWithoutMentorInput = {
-  where: Prisma.FeedbackWhereUniqueInput
-  data: Prisma.XOR<Prisma.FeedbackUpdateWithoutMentorInput, Prisma.FeedbackUncheckedUpdateWithoutMentorInput>
-}
-
-export type FeedbackUpdateManyWithWhereWithoutMentorInput = {
-  where: Prisma.FeedbackScalarWhereInput
-  data: Prisma.XOR<Prisma.FeedbackUpdateManyMutationInput, Prisma.FeedbackUncheckedUpdateManyWithoutMentorInput>
-}
-
-export type FeedbackScalarWhereInput = {
-  AND?: Prisma.FeedbackScalarWhereInput | Prisma.FeedbackScalarWhereInput[]
-  OR?: Prisma.FeedbackScalarWhereInput[]
-  NOT?: Prisma.FeedbackScalarWhereInput | Prisma.FeedbackScalarWhereInput[]
-  id?: Prisma.UuidFilter<"Feedback"> | string
-  submissionId?: Prisma.UuidFilter<"Feedback"> | string
-  mentorId?: Prisma.UuidFilter<"Feedback"> | string
-  comment?: Prisma.StringFilter<"Feedback"> | string
-  createdAt?: Prisma.DateTimeFilter<"Feedback"> | Date | string
-  updatedAt?: Prisma.DateTimeFilter<"Feedback"> | Date | string
+export type FeedbackUncheckedUpdateManyWithoutMentorNestedInput = {
+  create?: Prisma.XOR<Prisma.FeedbackCreateWithoutMentorInput, Prisma.FeedbackUncheckedCreateWithoutMentorInput> | Prisma.FeedbackCreateWithoutMentorInput[] | Prisma.FeedbackUncheckedCreateWithoutMentorInput[]
+  connectOrCreate?: Prisma.FeedbackCreateOrConnectWithoutMentorInput | Prisma.FeedbackCreateOrConnectWithoutMentorInput[]
+  upsert?: Prisma.FeedbackUpsertWithWhereUniqueWithoutMentorInput | Prisma.FeedbackUpsertWithWhereUniqueWithoutMentorInput[]
+  createMany?: Prisma.FeedbackCreateManyMentorInputEnvelope
+  set?: Prisma.FeedbackWhereUniqueInput | Prisma.FeedbackWhereUniqueInput[]
+  disconnect?: Prisma.FeedbackWhereUniqueInput | Prisma.FeedbackWhereUniqueInput[]
+  delete?: Prisma.FeedbackWhereUniqueInput | Prisma.FeedbackWhereUniqueInput[]
+  connect?: Prisma.FeedbackWhereUniqueInput | Prisma.FeedbackWhereUniqueInput[]
+  update?: Prisma.FeedbackUpdateWithWhereUniqueWithoutMentorInput | Prisma.FeedbackUpdateWithWhereUniqueWithoutMentorInput[]
+  updateMany?: Prisma.FeedbackUpdateManyWithWhereWithoutMentorInput | Prisma.FeedbackUpdateManyWithWhereWithoutMentorInput[]
+  deleteMany?: Prisma.FeedbackScalarWhereInput | Prisma.FeedbackScalarWhereInput[]
 }
 
 export type FeedbackCreateWithoutSubmissionInput = {
@@ -521,7 +467,27 @@ export type FeedbackUpdateManyWithWhereWithoutSubmissionInput = {
   data: Prisma.XOR<Prisma.FeedbackUpdateManyMutationInput, Prisma.FeedbackUncheckedUpdateManyWithoutSubmissionInput>
 }
 
-export type FeedbackCreateManyMentorInput = {
+export type FeedbackScalarWhereInput = {
+  AND?: Prisma.FeedbackScalarWhereInput | Prisma.FeedbackScalarWhereInput[]
+  OR?: Prisma.FeedbackScalarWhereInput[]
+  NOT?: Prisma.FeedbackScalarWhereInput | Prisma.FeedbackScalarWhereInput[]
+  id?: Prisma.UuidFilter<"Feedback"> | string
+  submissionId?: Prisma.UuidFilter<"Feedback"> | string
+  mentorId?: Prisma.UuidFilter<"Feedback"> | string
+  comment?: Prisma.StringFilter<"Feedback"> | string
+  createdAt?: Prisma.DateTimeFilter<"Feedback"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Feedback"> | Date | string
+}
+
+export type FeedbackCreateWithoutMentorInput = {
+  id?: string
+  comment: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  submission: Prisma.SubmissionCreateNestedOneWithoutFeedbacksInput
+}
+
+export type FeedbackUncheckedCreateWithoutMentorInput = {
   id?: string
   submissionId: string
   comment: string
@@ -529,28 +495,30 @@ export type FeedbackCreateManyMentorInput = {
   updatedAt?: Date | string
 }
 
-export type FeedbackUpdateWithoutMentorInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  comment?: Prisma.StringFieldUpdateOperationsInput | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  submission?: Prisma.SubmissionUpdateOneRequiredWithoutFeedbacksNestedInput
+export type FeedbackCreateOrConnectWithoutMentorInput = {
+  where: Prisma.FeedbackWhereUniqueInput
+  create: Prisma.XOR<Prisma.FeedbackCreateWithoutMentorInput, Prisma.FeedbackUncheckedCreateWithoutMentorInput>
 }
 
-export type FeedbackUncheckedUpdateWithoutMentorInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  submissionId?: Prisma.StringFieldUpdateOperationsInput | string
-  comment?: Prisma.StringFieldUpdateOperationsInput | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+export type FeedbackCreateManyMentorInputEnvelope = {
+  data: Prisma.FeedbackCreateManyMentorInput | Prisma.FeedbackCreateManyMentorInput[]
+  skipDuplicates?: boolean
 }
 
-export type FeedbackUncheckedUpdateManyWithoutMentorInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  submissionId?: Prisma.StringFieldUpdateOperationsInput | string
-  comment?: Prisma.StringFieldUpdateOperationsInput | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+export type FeedbackUpsertWithWhereUniqueWithoutMentorInput = {
+  where: Prisma.FeedbackWhereUniqueInput
+  update: Prisma.XOR<Prisma.FeedbackUpdateWithoutMentorInput, Prisma.FeedbackUncheckedUpdateWithoutMentorInput>
+  create: Prisma.XOR<Prisma.FeedbackCreateWithoutMentorInput, Prisma.FeedbackUncheckedCreateWithoutMentorInput>
+}
+
+export type FeedbackUpdateWithWhereUniqueWithoutMentorInput = {
+  where: Prisma.FeedbackWhereUniqueInput
+  data: Prisma.XOR<Prisma.FeedbackUpdateWithoutMentorInput, Prisma.FeedbackUncheckedUpdateWithoutMentorInput>
+}
+
+export type FeedbackUpdateManyWithWhereWithoutMentorInput = {
+  where: Prisma.FeedbackScalarWhereInput
+  data: Prisma.XOR<Prisma.FeedbackUpdateManyMutationInput, Prisma.FeedbackUncheckedUpdateManyWithoutMentorInput>
 }
 
 export type FeedbackCreateManySubmissionInput = {
@@ -580,6 +548,38 @@ export type FeedbackUncheckedUpdateWithoutSubmissionInput = {
 export type FeedbackUncheckedUpdateManyWithoutSubmissionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   mentorId?: Prisma.StringFieldUpdateOperationsInput | string
+  comment?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type FeedbackCreateManyMentorInput = {
+  id?: string
+  submissionId: string
+  comment: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type FeedbackUpdateWithoutMentorInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  comment?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  submission?: Prisma.SubmissionUpdateOneRequiredWithoutFeedbacksNestedInput
+}
+
+export type FeedbackUncheckedUpdateWithoutMentorInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  submissionId?: Prisma.StringFieldUpdateOperationsInput | string
+  comment?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type FeedbackUncheckedUpdateManyWithoutMentorInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  submissionId?: Prisma.StringFieldUpdateOperationsInput | string
   comment?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string

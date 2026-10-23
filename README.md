@@ -1,287 +1,313 @@
-# ProjectPilot LMS — Backend Foundation (Phase 1 & Phase 2)
+# ProjectPilot LMS — Backend Architecture
 
-Production-ready Express.js + TypeScript REST API foundation and Neon PostgreSQL + Prisma ORM v7 integration for the ProjectPilot Learning Management System.
+Production-ready Express.js + TypeScript REST API foundation, Prisma ORM v7 with Neon PostgreSQL, and modular repository-based architecture for the ProjectPilot Learning Management System.
 
 ---
 
-## 1. Project Overview
+## 1. Project Overview & Architectural Phases
 
 ProjectPilot LMS is a platform designed for students and mentors to manage courses, modules, assignments, and submissions.
 
 - **Phase 1: Production-Ready Express + TypeScript Backend Foundation**
   - Strict TypeScript configuration (`ES2022`, CommonJS).
   - Separation of application definition (`app.ts`) from runtime listener/lifecycle (`server.ts`).
-  - Serverless-ready architecture compatible with traditional VM and Vercel environments.
   - Correlation IDs (`X-Request-Id`) and structured logging with automatic secret redaction.
-  - Security headers via Helmet and CORS origin validation.
+  - Security headers via Helmet, body size protection, and CORS origin validation.
   - Centralized error handling and standardized JSON response envelopes.
   - Health checks (liveness and readiness).
-- **Phase 2: Prisma ORM v7 with Neon PostgreSQL Integration**
+- **Phase 2: Prisma ORM v7 & Neon PostgreSQL Integration**
   - Stable Prisma ORM v7 (`7.10.1`) with the official Neon driver adapter (`@prisma/adapter-neon`).
   - Separation of CLI operations (`DIRECT_URL` in `prisma.config.ts`) and runtime pooled queries (`DATABASE_URL`).
-  - Shared lazy singleton client (`src/db/prisma.ts`) preventing connection leaks on module imports or tests.
-  - Core LMS domain schema (`User`, `Course`, `Module`, `ContentItem`, `Assignment`, `Submission`, `Feedback`).
-  - Protected student submission and review history using referential action rules (`onDelete: Restrict`).
-  - Initial migration generated (`20261023144200_init_lms_schema`).
-  - Database connectivity verification script (`npm run db:check`).
+  - Core LMS domain schema and referential protection rules (`onDelete: Restrict` for student submissions and history).
+- **Phase 3: Modular, Repository-Based Architecture & Multi-File Schemas**
+  - Multi-file Prisma schemas organized cleanly under `prisma/models/` (`user.prisma`, `course.prisma`, `module.prisma`, etc.).
+  - Centralized application settings (`src/config/app-config.ts`).
+  - Strict unidirectional dependency flow: `Route → Controller → Service → Repository → Database`.
+  - Type-safe generic `BaseRepository` for common CRUD operations.
+  - Re-exported domain entity types from generated Prisma clients (`src/models/index.ts`).
+  - Turnkey Vercel serverless deployment (`api/index.ts` & `vercel.json`).
 
 ---
 
-## 2. Prerequisites
-
-- **Node.js**: v18.x, v20.x, or v22+ (tested and verified on Node.js v24.17.0)
-- **npm**: v9+ (tested on npm 11.13.0)
-- **Neon Account**: A hosted PostgreSQL database on [Neon](https://neon.tech)
-
----
-
-## 3. Installation & Setup
-
-1. **Install dependencies**:
-   ```bash
-   npm install
-   ```
-
-2. **Configure environment variables**:
-   ```bash
-   cp .env.example .env
-   ```
-   *(On Windows PowerShell: `Copy-Item .env.example .env`)*
-
-3. **Generate Prisma Client**:
-   ```bash
-   npm run prisma:generate
-   ```
-
----
-
-## 4. Neon PostgreSQL Configuration
-
-Neon provides serverless PostgreSQL with connection pooling. Prisma ORM v7 separates the CLI migration URL from the runtime application adapter:
+## 2. Directory Architecture
 
 ```text
-                               ┌────────────────────────────────────────────────────────┐
-                               │                     Neon Project                       │
-                               │                                                        │
-┌───────────────────────────┐  │  ┌─────────────────────────┐   ┌────────────────────┐  │
-│  Application Runtime      │──┼─>│ Neon PgBouncer Pooler   │──>│ Postgres Engine    │  │
-│  (@prisma/adapter-neon)   │  │  │ (DATABASE_URL)          │   │                    │  │
-└───────────────────────────┘  │  └─────────────────────────┘   │                    │  │
-                               │                                │                    │  │
-┌───────────────────────────┐  │                                │                    │  │
-│  Prisma CLI / Migrations  │──┼───────────────────────────────>│ (DIRECT_URL)       │  │
-│  (prisma.config.ts)       │  │                                └────────────────────┘  │
-└───────────────────────────┘  │                                                        │
-                               └────────────────────────────────────────────────────────┘
+backend/
+├── api/
+│   └── index.ts                       # Vercel serverless function entry point
+├── prisma/
+│   ├── schema.prisma                  # Prisma root entry point (generator & datasource)
+│   ├── models/                        # Multi-file Prisma schemas
+│   │   ├── user.prisma                # User model & Role enum
+│   │   ├── course.prisma              # Course model
+│   │   ├── module.prisma              # Module model
+│   │   ├── content-item.prisma        # ContentItem model & ContentType enum
+│   │   ├── assignment.prisma          # Assignment model & SubmissionPolicy enum
+│   │   ├── submission.prisma          # Submission model & SubmissionStatus enum
+│   │   └── feedback.prisma            # Feedback model
+│   └── migrations/                    # SQL migrations history
+│
+├── src/
+│   ├── app.ts                         # Express app definition & middleware pipeline
+│   ├── server.ts                      # HTTP listener & graceful shutdown lifecycle
+│   ├── api/
+│   │   └── v1/
+│   │       └── index.ts               # Versioned API routes mount point (/api/v1)
+│   ├── config/
+│   │   ├── env.ts                     # Zod-validated environment schema
+│   │   └── app-config.ts              # Centralized application defaults & limits
+│   ├── db/
+│   │   └── prisma.ts                  # Shared lazy-singleton Prisma client (Neon adapter)
+│   ├── errors/
+│   │   └── app-error.ts               # AppError class & API response types
+│   ├── lib/
+│   │   ├── logger.ts                  # Structured JSON logger with sensitive data redaction
+│   │   └── async-handler.ts           # Safe async Express route wrapper
+│   ├── middleware/
+│   │   ├── error-handler.ts           # Central error handling middleware
+│   │   ├── not-found.ts               # 404 handler for unknown routes
+│   │   └── request-context.ts         # Correlation ID (X-Request-Id) and latency logger
+│   ├── models/
+│   │   ├── index.ts                   # Domain entity type re-exports from Prisma
+│   │   └── README.md                  # Documentation on model separation
+│   ├── modules/
+│   │   ├── health/                    # Health module (liveness & readiness)
+│   │   │   ├── health.controller.ts
+│   │   │   ├── health.routes.ts
+│   │   │   └── health.service.ts
+│   │   └── README.md                  # Guide for adding new feature modules
+│   ├── repositories/
+│   │   ├── base.repository.ts         # Generic type-safe CRUD repository
+│   │   ├── repository.types.ts        # Repository interfaces & pagination types
+│   │   └── README.md                  # Guide for feature-specific repositories
+│   ├── routes/
+│   │   └── index.ts                   # Central route alias
+│   ├── scripts/
+│   │   └── verify-db.ts               # Harmless DB connectivity check script (SELECT 1)
+│   ├── types/
+│   │   └── express.d.ts               # Express request augmentation (req.id, startTime)
+│   └── utils/
+│       ├── pagination.ts              # Reusable pagination calculations
+│       ├── slugify.ts                 # String to URL slug converter
+│       └── index.ts
+│
+├── tests/
+│   ├── app.test.ts                    # HTTP integration & lifecycle tests
+│   ├── base-repository.test.ts        # Generic repository unit tests
+│   └── utils.test.ts                  # Utility unit tests
+├── .env.example                       # Environment variables template
+├── eslint.config.mjs                  # ESLint 9 configuration
+├── package.json                       # Scripts and dependencies
+├── prisma.config.ts                   # Prisma v7 configuration file
+├── tsconfig.json                      # Strict TypeScript compiler options
+├── vercel.json                        # Vercel serverless routing
+└── vitest.config.mts                  # Vitest test configuration
 ```
 
-### How to Create a Neon Project and Obtain Connection Strings
+---
 
-1. Log in to [Neon Console](https://console.neon.tech).
-2. Click **Create Project** (e.g., name it `projectpilot-lms`).
-3. Select your cloud provider and region (e.g., AWS `us-east-2`).
-4. On the **Dashboard**, locate the **Connection Details** card:
-   - **Pooled connection URL (`DATABASE_URL`)**:
-     Ensure **Connection pooling** is checked. Copy the pooled connection string:
-     ```env
-     DATABASE_URL="postgresql://[user]:[password]@[endpoint-id]-pooler.[region].aws.neon.tech/[dbname]?sslmode=require"
-     ```
-   - **Direct connection URL (`DIRECT_URL`)**:
-     Uncheck **Connection pooling**. Copy the direct connection string:
-     ```env
-     DIRECT_URL="postgresql://[user]:[password]@[endpoint-id].[region].aws.neon.tech/[dbname]?sslmode=require"
-     ```
-5. Paste both values into your local `.env` file.
+## 3. Dependency Flow & Architecture Rules
+
+```text
+HTTP Request
+    ↓
+Route (`<feature>.routes.ts`)
+    ↓
+Middleware (auth, validation, requestContext)
+    ↓
+Controller (`<feature>.controller.ts`)
+    ↓
+Service (`<feature>.service.ts`)
+    ↓
+Repository (`<feature>.repository.ts`)
+    ↓
+Shared Database Client (`src/db/prisma.ts`)
+    ↓
+Neon PostgreSQL
+```
+
+### Core Architecture Rules:
+1. **Routes** define endpoints and mount middlewares. They never contain business logic.
+2. **Controllers** parse HTTP input (`req.body`, `req.params`, `req.query`), delegate to services, and format standardized responses. **Controllers never execute direct Prisma queries.**
+3. **Services** execute domain validation, coordinate business logic, and orchestrate transactions. **Services never touch Express `req` or `res` objects.**
+4. **Repositories** execute database queries using Prisma. **Repositories never accept Express request objects.**
+5. **Shared Database Client** is a lazy singleton in `src/db/prisma.ts` that prevents unwanted database connections during module imports or testing.
+6. **No Circular Dependencies**: Lower layers never import from upper layers.
 
 ---
 
-## 5. Environment Variables Reference
+## 4. Prisma Multi-File Schemas
 
-Environment variables are validated on startup using **Zod** (`src/config/env.ts`).
+Prisma v7 natively supports multi-file schemas without custom build scripts.
 
-| Variable | Type | Default | Required | Description |
-|---|---|---|---|---|
-| `NODE_ENV` | `'development' \| 'test' \| 'production'` | `'development'` | No | Runtime environment |
-| `PORT` | `number` (1 - 65535) | `5000` | No | Port for the HTTP listener |
-| `CORS_ORIGIN` | `string` (comma-separated or single) | `http://localhost:3000` | No | Allowed origins for CORS requests |
-| `DATABASE_URL` | `string` (Postgres URL) | — | Production | Neon pooled connection string for app queries |
-| `DIRECT_URL` | `string` (Postgres URL) | — | Production | Neon direct connection string for Prisma CLI/migrations |
+- **Configuration (`prisma.config.ts`)**:
+  Points the `schema` property directly to the `prisma` directory:
+  ```typescript
+  import 'dotenv/config';
+  import { defineConfig, env } from 'prisma/config';
 
-> **Security Note:** Never commit `.env` or production credentials to source control. The repository `.gitignore` excludes all `.env` files except `.env.example`. Connection strings are automatically redacted in application logs.
+  export default defineConfig({
+    schema: 'prisma',
+    datasource: {
+      url: env('DIRECT_URL'),
+    },
+  });
+  ```
+- **Root Entry Point (`prisma/schema.prisma`)**:
+  Declares the `generator` and `datasource`:
+  ```prisma
+  generator client {
+    provider = "prisma-client"
+    output   = "../src/generated/prisma"
+  }
+
+  datasource db {
+    provider = "postgresql"
+  }
+  ```
+- **Individual Models (`prisma/models/*.prisma`)**:
+  Each domain entity lives in its own `.prisma` file. Cross-file relations resolve automatically without explicit imports.
+
+### How to Add a New Prisma Model:
+1. Create `prisma/models/<entity>.prisma`.
+2. Define the model and any relevant enums.
+3. Validate: `npm run prisma:validate`.
+4. Regenerate Client: `npm run prisma:generate`.
 
 ---
 
-## 6. Development & Production Commands
+## 5. Repositories: Base vs. Feature-Specific
+
+### Generic `BaseRepository`
+Provides type-safe, reusable CRUD operations without boilerplate:
+- `findById(id: string): Promise<T | null>`
+- `findUnique(where: TWhereUniqueInput): Promise<T | null>`
+- `findMany(options: FindManyOptions): Promise<PaginatedResult<T>>`
+- `create(data: TCreateInput): Promise<T>`
+- `update(where: TWhereUniqueInput, data: TUpdateInput): Promise<T>`
+- `delete(where: TWhereUniqueInput): Promise<T>`
+- `count(where?: TWhereInput): Promise<number>`
+- `exists(where: TWhereUniqueInput): Promise<boolean>`
+
+### Feature-Specific Repositories
+Feature repositories extend `BaseRepository` or instantiate Prisma delegates directly for domain queries:
+- Mentor dashboard review queues.
+- Student submission history and attempt numbering.
+- Complex multi-relation aggregations.
+
+### Transactions
+Coordinate multi-step operations using `prisma.$transaction`:
+```typescript
+await prisma.$transaction(async (tx) => {
+  const submissionRepo = new SubmissionRepository(tx.submission);
+  const feedbackRepo = new FeedbackRepository(tx.feedback);
+
+  await submissionRepo.updateStatus(submissionId, 'APPROVED');
+  await feedbackRepo.createFeedback({ submissionId, mentorId, comment });
+});
+```
+
+---
+
+## 6. How to Add a New Feature Module (Example)
+
+Adding a `courses` module:
+
+1. **Model**: Create `prisma/models/course.prisma` and run `npm run prisma:generate`.
+2. **Repository** (`src/modules/courses/courses.repository.ts`):
+   ```typescript
+   import { BaseRepository } from '../../repositories/base.repository';
+   import { Course, Prisma } from '../../generated/prisma/client';
+   import { prisma } from '../../db/prisma';
+
+   export class CourseRepository extends BaseRepository<
+     Course,
+     typeof prisma.course,
+     Prisma.CourseWhereUniqueInput,
+     Prisma.CourseWhereInput,
+     Prisma.CourseOrderByWithRelationInput,
+     Prisma.CourseCreateInput,
+     Prisma.CourseUpdateInput
+   > {
+     constructor() {
+       super(prisma.course);
+     }
+
+     async findBySlug(slug: string): Promise<Course | null> {
+       return this.delegate.findUnique({ where: { slug } });
+     }
+   }
+   ```
+3. **Service** (`src/modules/courses/courses.service.ts`):
+   ```typescript
+   export class CourseService {
+     constructor(private courseRepo = new CourseRepository()) {}
+
+     async getCourseBySlug(slug: string) {
+       const course = await this.courseRepo.findBySlug(slug);
+       if (!course) throw AppError.notFound('Course not found');
+       return course;
+     }
+   }
+   ```
+4. **Controller** (`src/modules/courses/courses.controller.ts`):
+   ```typescript
+   export class CourseController {
+     constructor(private courseService = new CourseService()) {}
+
+     getCourse = asyncHandler(async (req, res) => {
+       const course = await this.courseService.getCourseBySlug(req.params.slug);
+       res.status(200).json({ success: true, data: course });
+     });
+   }
+   ```
+5. **Routes** (`src/modules/courses/courses.routes.ts`):
+   ```typescript
+   const router = Router();
+   const controller = new CourseController();
+   router.get('/:slug', controller.getCourse);
+   export const courseRoutes = router;
+   ```
+6. **Mount** in `src/api/v1/index.ts`:
+   ```typescript
+   router.use('/courses', courseRoutes);
+   ```
+
+---
+
+## 7. Development & Production Commands
 
 | Command | Action |
 |---|---|
 | `npm run dev` | Starts development server with hot reload (`tsx watch src/server.ts`) |
 | `npm run build` | Compiles TypeScript source to `./dist` (`tsc`) |
-| `npm start` | Executes the compiled production server (`node dist/server.js`) |
-| `npm run typecheck` | Validates TypeScript types without emitting files (`tsc --noEmit`) |
-| `npm run lint` | Runs ESLint flat config across the codebase |
-| `npm run lint:fix` | Runs ESLint and automatically fixes formatting issues |
+| `npm start` | Executes compiled production server (`node dist/server.js`) |
+| `npm run typecheck` | Validates TypeScript types across the project (`tsc --noEmit`) |
+| `npm run lint` | Runs ESLint across the codebase |
+| `npm run lint:fix` | Runs ESLint and auto-fixes issues |
 | `npm test` | Runs the test suite via Vitest (`vitest run`) |
 | `npm run test:watch` | Runs tests in interactive watch mode (`vitest`) |
 | `npm run prisma:generate` | Generates Prisma v7 Client into `src/generated/prisma` |
-| `npm run prisma:validate` | Validates `prisma/schema.prisma` against `prisma.config.ts` |
-| `npm run prisma:migrate:dev` | Creates and applies development migrations against Neon |
-| `npm run prisma:migrate:deploy` | Applies pending migrations in production/CI |
-| `npm run prisma:studio` | Opens Prisma Studio web UI for browsing database models |
-| `npm run db:check` | Verifies database connectivity using `src/scripts/verify-db.ts` |
+| `npm run prisma:validate` | Validates multi-file schemas in `prisma/` against `prisma.config.ts` |
+| `npm run prisma:migrate:dev` | Creates and applies development migrations |
+| `npm run prisma:migrate:deploy` | Applies pending migrations in production / CI |
+| `npm run prisma:studio` | Opens Prisma Studio web UI |
+| `npm run db:check` | Verifies Neon database connectivity (`SELECT 1`) |
 
 ---
 
-## 7. Database Schema & Architecture
+## 8. Health Endpoints
 
-The database schema models the core ProjectPilot LMS entities with strict referential safety:
-
-```text
-   ┌──────────┐
-   │  Course  │
-   └────┬─────┘
-        │ 1:N (Cascade)
-        ▼
-   ┌──────────┐
-   │  Module  │
-   └────┬─────┘
-        ├────────────────────────────────┐ 1:N (Cascade)
-        │ 1:N (Cascade)                  ▼
-        ▼                        ┌──────────────┐
- ┌─────────────┐                 │  Assignment  │
- │ ContentItem │                 └──────┬───────┘
- └─────────────┘                        │ 1:N (Restrict - protects student work)
-                                        ▼
- ┌─────────────┐ 1:N (Restrict)  ┌──────────────┐ 1:N (Cascade)  ┌──────────┐
- │    User     ├────────────────>│  Submission  │<───────────────┤ Feedback │
- └──────┬──────┘                 └──────────────┘                └────┬─────┘
-        │                                                             │
-        └─────────────────────────────────────────────────────────────┘
-                                  1:N (Restrict)
-```
-
-### Models Summary
-
-1. **`User` (`users`)**:
-   - `id` (UUID), `name`, `email` (unique), `passwordHash`, `role` (`STUDENT` \| `MENTOR`), timestamps.
-   - Separate named relations for student submissions, mentor reviews, and feedback.
-2. **`Course` (`courses`)**:
-   - `id` (UUID), `title`, `slug` (unique), `description`, `isPublished`, timestamps.
-3. **`Module` (`modules`)**:
-   - `id` (UUID), `courseId`, `title`, `description`, `order`, `isPublished`, timestamps.
-   - Enforces `UNIQUE(courseId, order)`.
-4. **`ContentItem` (`content_items`)**:
-   - `id` (UUID), `moduleId`, `type` (`VIDEO` \| `TEXT` \| `LINK`), `title`, `body`, `url`, `order`, timestamps.
-   - Enforces `UNIQUE(moduleId, order)`.
-5. **`Assignment` (`assignments`)**:
-   - `id` (UUID), `moduleId`, `title`, `instructions`, `submissionPolicy` (`ONE_TIME` \| `RESUBMITTABLE`), `isPublished`, `dueAt`, timestamps.
-6. **`Submission` (`submissions`)**:
-   - `id` (UUID), `assignmentId`, `studentId`, `attemptNumber`, `projectName`, `repoUrl`, `liveUrl`, `description`, `status` (`PENDING` \| `APPROVED` \| `REJECTED`), `reviewedById`, `reviewedAt`, timestamps.
-   - Enforces `UNIQUE(assignmentId, studentId, attemptNumber)`.
-   - Referential action: `onDelete: Restrict` prevents accidental deletion of assignments or student accounts if submissions exist.
-   - Composite indexes on `(assignmentId, status)` and `studentId` for optimal mentor/student dashboard queries.
-7. **`Feedback` (`feedbacks`)**:
-   - `id` (UUID), `submissionId`, `mentorId`, `comment`, timestamps.
-   - Referential action: `onDelete: Restrict` on mentor to preserve review history.
+- **Liveness**: `GET /api/v1/health`
+  - Returns `200 OK` confirming the process is alive.
+- **Readiness**: `GET /api/v1/health/ready`
+  - Probes live database connectivity (`SELECT 1`). Returns `200 OK` if connected, or `503 Service Unavailable` if unreachable.
 
 ---
 
-## 8. Migration Workflow
+## 9. Vercel Serverless Deployment
 
-### Initial Migration
-The initial migration is pre-generated in:
-```text
-prisma/migrations/20261023144200_init_lms_schema/migration.sql
-```
-
-### Developing New Migrations
-When adding new fields or models in development with an active Neon database:
-```bash
-npm run prisma:migrate:dev -- --name descriptive_migration_name
-```
-*`prisma migrate dev` creates the SQL migration, tracks it in `prisma/migrations`, updates the schema, and regenerates Prisma Client.*
-
-### Deploying Migrations in Production & CI/CD
-In production environments or CI/CD pipelines, run:
-```bash
-npm run prisma:migrate:deploy
-```
-- Uses `DIRECT_URL` defined in `prisma.config.ts`.
-- Bypasses connection poolers to execute DDL migrations safely.
-- Never runs destructive drops or prompts interactively.
-
----
-
-## 9. Database Verification Script
-
-To verify that your Neon connection parameters are valid without starting the HTTP server:
-
-```bash
-npm run db:check
-```
-
-**Behavior**:
-- Imports the shared client from `src/db/prisma.ts`.
-- Executes a non-destructive query (`SELECT 1`).
-- Measures and logs latency.
-- Exits with `0` on success or `1` on connection error.
-- Cleans up the connection pool and shuts down cleanly.
-- Never prints passwords or tokens in error logs.
-
----
-
-## 10. Health Endpoints
-
-### 1. Liveness Probe: `GET /api/v1/health`
-Confirms the HTTP server process is running and responsive.
-
-**Sample Response (`200 OK`):**
-```json
-{
-  "success": true,
-  "data": {
-    "status": "ok",
-    "uptimeSeconds": 15,
-    "timestamp": "2026-10-23T14:50:00.000Z",
-    "environment": "development",
-    "version": "1.0.0"
-  }
-}
-```
-
-### 2. Readiness Probe: `GET /api/v1/health/ready`
-Performs an active database connectivity check using the shared Prisma client.
-
-- **Healthy Response (`200 OK`)**:
-  ```json
-  {
-    "success": true,
-    "data": {
-      "status": "ok",
-      "services": {
-        "http": "up",
-        "database": "connected"
-      },
-      "latencyMs": 14,
-      "timestamp": "2026-10-23T14:50:00.000Z"
-    }
-  }
-  ```
-- **Degraded Response (`503 Service Unavailable`)**:
-  ```json
-  {
-    "success": false,
-    "data": {
-      "status": "degraded",
-      "services": {
-        "http": "up",
-        "database": "disconnected"
-      },
-      "timestamp": "2026-10-23T14:50:00.000Z"
-    },
-    "error": {
-      "code": "DATABASE_UNAVAILABLE",
-      "message": "Database connection failed"
-    }
-  }
-  ```
+The project is structured for native Vercel deployment:
+- Entry point: `api/index.ts` exports the listener-free Express `app`.
+- Routing: `vercel.json` rewrites all requests to `/api/index.ts`.
+- Ready for zero-config Vercel Preview and Production deployments.

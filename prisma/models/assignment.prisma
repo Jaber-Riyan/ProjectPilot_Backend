@@ -1,0 +1,24 @@
+enum SubmissionPolicy {
+  ONE_TIME
+  RESUBMITTABLE
+}
+
+model Assignment {
+  id               String           @id @default(uuid()) @db.Uuid
+  moduleId         String           @db.Uuid
+  title            String
+  instructions     String           @db.Text
+  submissionPolicy SubmissionPolicy @default(ONE_TIME)
+  isPublished      Boolean          @default(false)
+  dueAt            DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  // Relationships
+  module      Module       @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  submissions Submission[]
+
+  @@index([moduleId])
+  @@index([isPublished])
+  @@map("assignments")
+}

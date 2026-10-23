@@ -1,9 +1,4 @@
-import { Router } from 'express';
-import { healthRoutes } from '../modules/health/health.routes';
+import { v1ApiRouter } from '../api/v1';
 
-const router = Router();
-
-// Register v1 routes
-router.use('/health', healthRoutes);
-
-export const v1Routes = router;
+export const v1Routes = v1ApiRouter;
+export default v1ApiRouter;

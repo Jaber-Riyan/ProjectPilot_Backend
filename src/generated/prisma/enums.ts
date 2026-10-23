@@ -9,12 +9,12 @@
 * 🟢 You can import this file directly.
 */
 
-export const Role = {
-  STUDENT: 'STUDENT',
-  MENTOR: 'MENTOR'
+export const SubmissionPolicy = {
+  ONE_TIME: 'ONE_TIME',
+  RESUBMITTABLE: 'RESUBMITTABLE'
 } as const
 
-export type Role = (typeof Role)[keyof typeof Role]
+export type SubmissionPolicy = (typeof SubmissionPolicy)[keyof typeof SubmissionPolicy]
 
 
 export const ContentType = {
@@ -26,14 +26,6 @@ export const ContentType = {
 export type ContentType = (typeof ContentType)[keyof typeof ContentType]
 
 
-export const SubmissionPolicy = {
-  ONE_TIME: 'ONE_TIME',
-  RESUBMITTABLE: 'RESUBMITTABLE'
-} as const
-
-export type SubmissionPolicy = (typeof SubmissionPolicy)[keyof typeof SubmissionPolicy]
-
-
 export const SubmissionStatus = {
   PENDING: 'PENDING',
   APPROVED: 'APPROVED',
@@ -41,3 +33,11 @@ export const SubmissionStatus = {
 } as const
 
 export type SubmissionStatus = (typeof SubmissionStatus)[keyof typeof SubmissionStatus]
+
+
+export const Role = {
+  STUDENT: 'STUDENT',
+  MENTOR: 'MENTOR'
+} as const
+
+export type Role = (typeof Role)[keyof typeof Role]

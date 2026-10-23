@@ -396,16 +396,6 @@ export type ContentItemUncheckedUpdateManyInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type ContentItemListRelationFilter = {
-  every?: Prisma.ContentItemWhereInput
-  some?: Prisma.ContentItemWhereInput
-  none?: Prisma.ContentItemWhereInput
-}
-
-export type ContentItemOrderByRelationAggregateInput = {
-  _count?: Prisma.SortOrder
-}
-
 export type ContentItemModuleIdOrderCompoundUniqueInput = {
   moduleId: string
   order: number
@@ -455,6 +445,32 @@ export type ContentItemSumOrderByAggregateInput = {
   order?: Prisma.SortOrder
 }
 
+export type ContentItemListRelationFilter = {
+  every?: Prisma.ContentItemWhereInput
+  some?: Prisma.ContentItemWhereInput
+  none?: Prisma.ContentItemWhereInput
+}
+
+export type ContentItemOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
+}
+
+export type EnumContentTypeFieldUpdateOperationsInput = {
+  set?: $Enums.ContentType
+}
+
+export type NullableStringFieldUpdateOperationsInput = {
+  set?: string | null
+}
+
+export type IntFieldUpdateOperationsInput = {
+  set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
 export type ContentItemCreateNestedManyWithoutModuleInput = {
   create?: Prisma.XOR<Prisma.ContentItemCreateWithoutModuleInput, Prisma.ContentItemUncheckedCreateWithoutModuleInput> | Prisma.ContentItemCreateWithoutModuleInput[] | Prisma.ContentItemUncheckedCreateWithoutModuleInput[]
   connectOrCreate?: Prisma.ContentItemCreateOrConnectWithoutModuleInput | Prisma.ContentItemCreateOrConnectWithoutModuleInput[]
@@ -495,10 +511,6 @@ export type ContentItemUncheckedUpdateManyWithoutModuleNestedInput = {
   update?: Prisma.ContentItemUpdateWithWhereUniqueWithoutModuleInput | Prisma.ContentItemUpdateWithWhereUniqueWithoutModuleInput[]
   updateMany?: Prisma.ContentItemUpdateManyWithWhereWithoutModuleInput | Prisma.ContentItemUpdateManyWithWhereWithoutModuleInput[]
   deleteMany?: Prisma.ContentItemScalarWhereInput | Prisma.ContentItemScalarWhereInput[]
-}
-
-export type EnumContentTypeFieldUpdateOperationsInput = {
-  set?: $Enums.ContentType
 }
 
 export type ContentItemCreateWithoutModuleInput = {

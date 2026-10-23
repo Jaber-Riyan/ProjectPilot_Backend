@@ -391,6 +391,11 @@ export type ModuleUncheckedUpdateManyInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
+export type ModuleScalarRelationFilter = {
+  is?: Prisma.ModuleWhereInput
+  isNot?: Prisma.ModuleWhereInput
+}
+
 export type ModuleListRelationFilter = {
   every?: Prisma.ModuleWhereInput
   some?: Prisma.ModuleWhereInput
@@ -447,9 +452,32 @@ export type ModuleSumOrderByAggregateInput = {
   order?: Prisma.SortOrder
 }
 
-export type ModuleScalarRelationFilter = {
-  is?: Prisma.ModuleWhereInput
-  isNot?: Prisma.ModuleWhereInput
+export type ModuleCreateNestedOneWithoutAssignmentsInput = {
+  create?: Prisma.XOR<Prisma.ModuleCreateWithoutAssignmentsInput, Prisma.ModuleUncheckedCreateWithoutAssignmentsInput>
+  connectOrCreate?: Prisma.ModuleCreateOrConnectWithoutAssignmentsInput
+  connect?: Prisma.ModuleWhereUniqueInput
+}
+
+export type ModuleUpdateOneRequiredWithoutAssignmentsNestedInput = {
+  create?: Prisma.XOR<Prisma.ModuleCreateWithoutAssignmentsInput, Prisma.ModuleUncheckedCreateWithoutAssignmentsInput>
+  connectOrCreate?: Prisma.ModuleCreateOrConnectWithoutAssignmentsInput
+  upsert?: Prisma.ModuleUpsertWithoutAssignmentsInput
+  connect?: Prisma.ModuleWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ModuleUpdateToOneWithWhereWithoutAssignmentsInput, Prisma.ModuleUpdateWithoutAssignmentsInput>, Prisma.ModuleUncheckedUpdateWithoutAssignmentsInput>
+}
+
+export type ModuleCreateNestedOneWithoutContentItemsInput = {
+  create?: Prisma.XOR<Prisma.ModuleCreateWithoutContentItemsInput, Prisma.ModuleUncheckedCreateWithoutContentItemsInput>
+  connectOrCreate?: Prisma.ModuleCreateOrConnectWithoutContentItemsInput
+  connect?: Prisma.ModuleWhereUniqueInput
+}
+
+export type ModuleUpdateOneRequiredWithoutContentItemsNestedInput = {
+  create?: Prisma.XOR<Prisma.ModuleCreateWithoutContentItemsInput, Prisma.ModuleUncheckedCreateWithoutContentItemsInput>
+  connectOrCreate?: Prisma.ModuleCreateOrConnectWithoutContentItemsInput
+  upsert?: Prisma.ModuleUpsertWithoutContentItemsInput
+  connect?: Prisma.ModuleWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ModuleUpdateToOneWithWhereWithoutContentItemsInput, Prisma.ModuleUpdateWithoutContentItemsInput>, Prisma.ModuleUncheckedUpdateWithoutContentItemsInput>
 }
 
 export type ModuleCreateNestedManyWithoutCourseInput = {
@@ -494,43 +522,7 @@ export type ModuleUncheckedUpdateManyWithoutCourseNestedInput = {
   deleteMany?: Prisma.ModuleScalarWhereInput | Prisma.ModuleScalarWhereInput[]
 }
 
-export type IntFieldUpdateOperationsInput = {
-  set?: number
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
-export type ModuleCreateNestedOneWithoutContentItemsInput = {
-  create?: Prisma.XOR<Prisma.ModuleCreateWithoutContentItemsInput, Prisma.ModuleUncheckedCreateWithoutContentItemsInput>
-  connectOrCreate?: Prisma.ModuleCreateOrConnectWithoutContentItemsInput
-  connect?: Prisma.ModuleWhereUniqueInput
-}
-
-export type ModuleUpdateOneRequiredWithoutContentItemsNestedInput = {
-  create?: Prisma.XOR<Prisma.ModuleCreateWithoutContentItemsInput, Prisma.ModuleUncheckedCreateWithoutContentItemsInput>
-  connectOrCreate?: Prisma.ModuleCreateOrConnectWithoutContentItemsInput
-  upsert?: Prisma.ModuleUpsertWithoutContentItemsInput
-  connect?: Prisma.ModuleWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.ModuleUpdateToOneWithWhereWithoutContentItemsInput, Prisma.ModuleUpdateWithoutContentItemsInput>, Prisma.ModuleUncheckedUpdateWithoutContentItemsInput>
-}
-
-export type ModuleCreateNestedOneWithoutAssignmentsInput = {
-  create?: Prisma.XOR<Prisma.ModuleCreateWithoutAssignmentsInput, Prisma.ModuleUncheckedCreateWithoutAssignmentsInput>
-  connectOrCreate?: Prisma.ModuleCreateOrConnectWithoutAssignmentsInput
-  connect?: Prisma.ModuleWhereUniqueInput
-}
-
-export type ModuleUpdateOneRequiredWithoutAssignmentsNestedInput = {
-  create?: Prisma.XOR<Prisma.ModuleCreateWithoutAssignmentsInput, Prisma.ModuleUncheckedCreateWithoutAssignmentsInput>
-  connectOrCreate?: Prisma.ModuleCreateOrConnectWithoutAssignmentsInput
-  upsert?: Prisma.ModuleUpsertWithoutAssignmentsInput
-  connect?: Prisma.ModuleWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.ModuleUpdateToOneWithWhereWithoutAssignmentsInput, Prisma.ModuleUpdateWithoutAssignmentsInput>, Prisma.ModuleUncheckedUpdateWithoutAssignmentsInput>
-}
-
-export type ModuleCreateWithoutCourseInput = {
+export type ModuleCreateWithoutAssignmentsInput = {
   id?: string
   title: string
   description?: string | null
@@ -538,12 +530,13 @@ export type ModuleCreateWithoutCourseInput = {
   isPublished?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  course: Prisma.CourseCreateNestedOneWithoutModulesInput
   contentItems?: Prisma.ContentItemCreateNestedManyWithoutModuleInput
-  assignments?: Prisma.AssignmentCreateNestedManyWithoutModuleInput
 }
 
-export type ModuleUncheckedCreateWithoutCourseInput = {
+export type ModuleUncheckedCreateWithoutAssignmentsInput = {
   id?: string
+  courseId: string
   title: string
   description?: string | null
   order: number
@@ -551,47 +544,46 @@ export type ModuleUncheckedCreateWithoutCourseInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   contentItems?: Prisma.ContentItemUncheckedCreateNestedManyWithoutModuleInput
-  assignments?: Prisma.AssignmentUncheckedCreateNestedManyWithoutModuleInput
 }
 
-export type ModuleCreateOrConnectWithoutCourseInput = {
+export type ModuleCreateOrConnectWithoutAssignmentsInput = {
   where: Prisma.ModuleWhereUniqueInput
-  create: Prisma.XOR<Prisma.ModuleCreateWithoutCourseInput, Prisma.ModuleUncheckedCreateWithoutCourseInput>
+  create: Prisma.XOR<Prisma.ModuleCreateWithoutAssignmentsInput, Prisma.ModuleUncheckedCreateWithoutAssignmentsInput>
 }
 
-export type ModuleCreateManyCourseInputEnvelope = {
-  data: Prisma.ModuleCreateManyCourseInput | Prisma.ModuleCreateManyCourseInput[]
-  skipDuplicates?: boolean
+export type ModuleUpsertWithoutAssignmentsInput = {
+  update: Prisma.XOR<Prisma.ModuleUpdateWithoutAssignmentsInput, Prisma.ModuleUncheckedUpdateWithoutAssignmentsInput>
+  create: Prisma.XOR<Prisma.ModuleCreateWithoutAssignmentsInput, Prisma.ModuleUncheckedCreateWithoutAssignmentsInput>
+  where?: Prisma.ModuleWhereInput
 }
 
-export type ModuleUpsertWithWhereUniqueWithoutCourseInput = {
-  where: Prisma.ModuleWhereUniqueInput
-  update: Prisma.XOR<Prisma.ModuleUpdateWithoutCourseInput, Prisma.ModuleUncheckedUpdateWithoutCourseInput>
-  create: Prisma.XOR<Prisma.ModuleCreateWithoutCourseInput, Prisma.ModuleUncheckedCreateWithoutCourseInput>
+export type ModuleUpdateToOneWithWhereWithoutAssignmentsInput = {
+  where?: Prisma.ModuleWhereInput
+  data: Prisma.XOR<Prisma.ModuleUpdateWithoutAssignmentsInput, Prisma.ModuleUncheckedUpdateWithoutAssignmentsInput>
 }
 
-export type ModuleUpdateWithWhereUniqueWithoutCourseInput = {
-  where: Prisma.ModuleWhereUniqueInput
-  data: Prisma.XOR<Prisma.ModuleUpdateWithoutCourseInput, Prisma.ModuleUncheckedUpdateWithoutCourseInput>
+export type ModuleUpdateWithoutAssignmentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  order?: Prisma.IntFieldUpdateOperationsInput | number
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  course?: Prisma.CourseUpdateOneRequiredWithoutModulesNestedInput
+  contentItems?: Prisma.ContentItemUpdateManyWithoutModuleNestedInput
 }
 
-export type ModuleUpdateManyWithWhereWithoutCourseInput = {
-  where: Prisma.ModuleScalarWhereInput
-  data: Prisma.XOR<Prisma.ModuleUpdateManyMutationInput, Prisma.ModuleUncheckedUpdateManyWithoutCourseInput>
-}
-
-export type ModuleScalarWhereInput = {
-  AND?: Prisma.ModuleScalarWhereInput | Prisma.ModuleScalarWhereInput[]
-  OR?: Prisma.ModuleScalarWhereInput[]
-  NOT?: Prisma.ModuleScalarWhereInput | Prisma.ModuleScalarWhereInput[]
-  id?: Prisma.UuidFilter<"Module"> | string
-  courseId?: Prisma.UuidFilter<"Module"> | string
-  title?: Prisma.StringFilter<"Module"> | string
-  description?: Prisma.StringNullableFilter<"Module"> | string | null
-  order?: Prisma.IntFilter<"Module"> | number
-  isPublished?: Prisma.BoolFilter<"Module"> | boolean
-  createdAt?: Prisma.DateTimeFilter<"Module"> | Date | string
-  updatedAt?: Prisma.DateTimeFilter<"Module"> | Date | string
+export type ModuleUncheckedUpdateWithoutAssignmentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  courseId?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  order?: Prisma.IntFieldUpdateOperationsInput | number
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  contentItems?: Prisma.ContentItemUncheckedUpdateManyWithoutModuleNestedInput
 }
 
 export type ModuleCreateWithoutContentItemsInput = {
@@ -658,7 +650,7 @@ export type ModuleUncheckedUpdateWithoutContentItemsInput = {
   assignments?: Prisma.AssignmentUncheckedUpdateManyWithoutModuleNestedInput
 }
 
-export type ModuleCreateWithoutAssignmentsInput = {
+export type ModuleCreateWithoutCourseInput = {
   id?: string
   title: string
   description?: string | null
@@ -666,13 +658,12 @@ export type ModuleCreateWithoutAssignmentsInput = {
   isPublished?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
-  course: Prisma.CourseCreateNestedOneWithoutModulesInput
   contentItems?: Prisma.ContentItemCreateNestedManyWithoutModuleInput
+  assignments?: Prisma.AssignmentCreateNestedManyWithoutModuleInput
 }
 
-export type ModuleUncheckedCreateWithoutAssignmentsInput = {
+export type ModuleUncheckedCreateWithoutCourseInput = {
   id?: string
-  courseId: string
   title: string
   description?: string | null
   order: number
@@ -680,46 +671,47 @@ export type ModuleUncheckedCreateWithoutAssignmentsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   contentItems?: Prisma.ContentItemUncheckedCreateNestedManyWithoutModuleInput
+  assignments?: Prisma.AssignmentUncheckedCreateNestedManyWithoutModuleInput
 }
 
-export type ModuleCreateOrConnectWithoutAssignmentsInput = {
+export type ModuleCreateOrConnectWithoutCourseInput = {
   where: Prisma.ModuleWhereUniqueInput
-  create: Prisma.XOR<Prisma.ModuleCreateWithoutAssignmentsInput, Prisma.ModuleUncheckedCreateWithoutAssignmentsInput>
+  create: Prisma.XOR<Prisma.ModuleCreateWithoutCourseInput, Prisma.ModuleUncheckedCreateWithoutCourseInput>
 }
 
-export type ModuleUpsertWithoutAssignmentsInput = {
-  update: Prisma.XOR<Prisma.ModuleUpdateWithoutAssignmentsInput, Prisma.ModuleUncheckedUpdateWithoutAssignmentsInput>
-  create: Prisma.XOR<Prisma.ModuleCreateWithoutAssignmentsInput, Prisma.ModuleUncheckedCreateWithoutAssignmentsInput>
-  where?: Prisma.ModuleWhereInput
+export type ModuleCreateManyCourseInputEnvelope = {
+  data: Prisma.ModuleCreateManyCourseInput | Prisma.ModuleCreateManyCourseInput[]
+  skipDuplicates?: boolean
 }
 
-export type ModuleUpdateToOneWithWhereWithoutAssignmentsInput = {
-  where?: Prisma.ModuleWhereInput
-  data: Prisma.XOR<Prisma.ModuleUpdateWithoutAssignmentsInput, Prisma.ModuleUncheckedUpdateWithoutAssignmentsInput>
+export type ModuleUpsertWithWhereUniqueWithoutCourseInput = {
+  where: Prisma.ModuleWhereUniqueInput
+  update: Prisma.XOR<Prisma.ModuleUpdateWithoutCourseInput, Prisma.ModuleUncheckedUpdateWithoutCourseInput>
+  create: Prisma.XOR<Prisma.ModuleCreateWithoutCourseInput, Prisma.ModuleUncheckedCreateWithoutCourseInput>
 }
 
-export type ModuleUpdateWithoutAssignmentsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  title?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  order?: Prisma.IntFieldUpdateOperationsInput | number
-  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  course?: Prisma.CourseUpdateOneRequiredWithoutModulesNestedInput
-  contentItems?: Prisma.ContentItemUpdateManyWithoutModuleNestedInput
+export type ModuleUpdateWithWhereUniqueWithoutCourseInput = {
+  where: Prisma.ModuleWhereUniqueInput
+  data: Prisma.XOR<Prisma.ModuleUpdateWithoutCourseInput, Prisma.ModuleUncheckedUpdateWithoutCourseInput>
 }
 
-export type ModuleUncheckedUpdateWithoutAssignmentsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  courseId?: Prisma.StringFieldUpdateOperationsInput | string
-  title?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  order?: Prisma.IntFieldUpdateOperationsInput | number
-  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  contentItems?: Prisma.ContentItemUncheckedUpdateManyWithoutModuleNestedInput
+export type ModuleUpdateManyWithWhereWithoutCourseInput = {
+  where: Prisma.ModuleScalarWhereInput
+  data: Prisma.XOR<Prisma.ModuleUpdateManyMutationInput, Prisma.ModuleUncheckedUpdateManyWithoutCourseInput>
+}
+
+export type ModuleScalarWhereInput = {
+  AND?: Prisma.ModuleScalarWhereInput | Prisma.ModuleScalarWhereInput[]
+  OR?: Prisma.ModuleScalarWhereInput[]
+  NOT?: Prisma.ModuleScalarWhereInput | Prisma.ModuleScalarWhereInput[]
+  id?: Prisma.UuidFilter<"Module"> | string
+  courseId?: Prisma.UuidFilter<"Module"> | string
+  title?: Prisma.StringFilter<"Module"> | string
+  description?: Prisma.StringNullableFilter<"Module"> | string | null
+  order?: Prisma.IntFilter<"Module"> | number
+  isPublished?: Prisma.BoolFilter<"Module"> | boolean
+  createdAt?: Prisma.DateTimeFilter<"Module"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Module"> | Date | string
 }
 
 export type ModuleCreateManyCourseInput = {

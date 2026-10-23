@@ -1,0 +1,16 @@
+model Feedback {
+  id           String   @id @default(uuid()) @db.Uuid
+  submissionId String   @db.Uuid
+  mentorId     String   @db.Uuid
+  comment      String   @db.Text
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relationships
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  mentor     User       @relation("MentorFeedback", fields: [mentorId], references: [id], onDelete: Restrict)
+
+  @@index([submissionId])
+  @@index([mentorId])
+  @@map("feedbacks")
+}

@@ -366,16 +366,6 @@ export type AssignmentUncheckedUpdateManyInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type AssignmentListRelationFilter = {
-  every?: Prisma.AssignmentWhereInput
-  some?: Prisma.AssignmentWhereInput
-  none?: Prisma.AssignmentWhereInput
-}
-
-export type AssignmentOrderByRelationAggregateInput = {
-  _count?: Prisma.SortOrder
-}
-
 export type AssignmentCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   moduleId?: Prisma.SortOrder
@@ -412,9 +402,39 @@ export type AssignmentMinOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
 }
 
+export type AssignmentListRelationFilter = {
+  every?: Prisma.AssignmentWhereInput
+  some?: Prisma.AssignmentWhereInput
+  none?: Prisma.AssignmentWhereInput
+}
+
+export type AssignmentOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
+}
+
 export type AssignmentScalarRelationFilter = {
   is?: Prisma.AssignmentWhereInput
   isNot?: Prisma.AssignmentWhereInput
+}
+
+export type StringFieldUpdateOperationsInput = {
+  set?: string
+}
+
+export type EnumSubmissionPolicyFieldUpdateOperationsInput = {
+  set?: $Enums.SubmissionPolicy
+}
+
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
+}
+
+export type NullableDateTimeFieldUpdateOperationsInput = {
+  set?: Date | string | null
+}
+
+export type DateTimeFieldUpdateOperationsInput = {
+  set?: Date | string
 }
 
 export type AssignmentCreateNestedManyWithoutModuleInput = {
@@ -457,14 +477,6 @@ export type AssignmentUncheckedUpdateManyWithoutModuleNestedInput = {
   update?: Prisma.AssignmentUpdateWithWhereUniqueWithoutModuleInput | Prisma.AssignmentUpdateWithWhereUniqueWithoutModuleInput[]
   updateMany?: Prisma.AssignmentUpdateManyWithWhereWithoutModuleInput | Prisma.AssignmentUpdateManyWithWhereWithoutModuleInput[]
   deleteMany?: Prisma.AssignmentScalarWhereInput | Prisma.AssignmentScalarWhereInput[]
-}
-
-export type EnumSubmissionPolicyFieldUpdateOperationsInput = {
-  set?: $Enums.SubmissionPolicy
-}
-
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
 }
 
 export type AssignmentCreateNestedOneWithoutSubmissionsInput = {

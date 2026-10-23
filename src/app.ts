@@ -2,11 +2,11 @@ import express, { Express } from 'express';
 import helmet from 'helmet';
 import cors, { CorsOptions } from 'cors';
 import { env } from './config/env';
-import { requestIdMiddleware } from './middleware/request-id.middleware';
-import { requestLoggerMiddleware } from './middleware/request-logger.middleware';
-import { notFoundMiddleware } from './middleware/not-found.middleware';
-import { errorHandlerMiddleware } from './middleware/error-handler.middleware';
-import { v1Routes } from './routes';
+import { appConfig } from './config/app-config';
+import { requestContextMiddleware } from './middleware/request-context';
+import { notFoundHandler } from './middleware/not-found';
+import { errorHandler } from './middleware/error-handler';
+import { v1ApiRouter } from './api/v1';
 import { AppError } from './errors/app-error';
 
 export function createApp(): Express {
@@ -48,24 +48,21 @@ export function createApp(): Express {
 
   app.use(cors(corsOptions));
 
-  // 3. Body Parsing with reasonable size limits
-  app.use(express.json({ limit: '10mb' }));
-  app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+  // 3. Body Parsing with configured size limits
+  app.use(express.json({ limit: appConfig.security.jsonLimit }));
+  app.use(express.urlencoded({ extended: true, limit: appConfig.security.bodyLimit }));
 
-  // 4. Request Correlation (Request ID)
-  app.use(requestIdMiddleware);
+  // 4. Request Correlation & Structured Logging
+  app.use(requestContextMiddleware);
 
-  // 5. Request Logging (Structured logs without secrets)
-  app.use(requestLoggerMiddleware);
+  // 5. Mount Versioned API Routes (/api/v1)
+  app.use(appConfig.server.apiPrefix, v1ApiRouter);
 
-  // 6. Mount Versioned API Routes
-  app.use('/api/v1', v1Routes);
+  // 6. Catch-all 404 Handler for Unknown Routes
+  app.use(notFoundHandler);
 
-  // 7. Catch-all 404 Handler for Unknown Routes
-  app.use(notFoundMiddleware);
-
-  // 8. Centralized Error Handling Middleware
-  app.use(errorHandlerMiddleware);
+  // 7. Centralized Error Handling Middleware
+  app.use(errorHandler);
 
   return app;
 }
