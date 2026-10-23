@@ -1,6 +1,6 @@
-# ProjectPilot LMS — Backend Architecture & Authentication System
+# ProjectPilot LMS — Backend Architecture & Course/Module Management
 
-Production-ready Express.js + TypeScript REST API foundation, Prisma ORM v7 with Neon PostgreSQL, modular repository-based architecture, database-backed atomic rate limiting, and secure role-based JWT authentication for the ProjectPilot Learning Management System.
+Production-ready Express.js + TypeScript REST API foundation, Prisma ORM v7 with Neon PostgreSQL, modular repository-based architecture, database-backed atomic rate limiting, secure role-based JWT authentication, and comprehensive course, module, content management with deterministic ordering for the ProjectPilot Learning Management System.
 
 ---
 
@@ -42,7 +42,15 @@ ProjectPilot LMS is a platform designed for students and mentors to manage cours
   - Strict authentication middleware (`authenticate`) validating token signature, expiration, active account status (`isActive`), and DB existence.
   - Role-based authorization middleware (`requireRole('STUDENT')`, `requireRole('MENTOR', 'ADMIN')`).
   - Idempotent seed script (`npm run db:seed`) provisioning initial mentor and administrator accounts safely.
-  - Route-specific database-backed rate limiting on auth endpoints (10 attempts per 15-minute window) without affecting health probes or standard API routes.
+  - Route-specific database-backed rate limiting on auth endpoints (10 attempts per 15-minute window).
+- **Phase 6: Course & Module APIs, Content Management & Deterministic Ordering**
+  - Course retrieval with pagination (`GET /api/v1/courses`) and detail retrieval (`GET /api/v1/courses/:courseId`).
+  - Mentor/Admin course management (`POST`, `PATCH`, `DELETE`).
+  - Module management with automatic append-to-end positioning (`POST /api/v1/courses/:courseId/modules`).
+  - Safe two-phase module reordering (`PATCH /api/v1/courses/:courseId/modules/reorder`) with atomic transactions preventing unique constraint collisions on `(courseId, order)`.
+  - Content item CRUD and multi-type payload validation (`VIDEO`, `YOUTUBE_VIDEO`, `TEXT`, `LINK`, `ASSIGNMENT`).
+  - Two-phase content reordering (`PATCH /api/v1/modules/:moduleId/content/reorder`) preventing unique constraint collisions on `(moduleId, order)`.
+  - Student publication access protection: students and unauthenticated guests are strictly prevented from viewing draft courses or unpublished modules/content.
 
 ---
 
@@ -56,7 +64,7 @@ backend/
 │   ├── schema.prisma                    # Root Prisma generator & datasource definition
 │   ├── models/                          # Multi-file Prisma schema models & enums
 │   │   ├── user.prisma                  # User model & Role enum (STUDENT, MENTOR, ADMIN)
-│   │   ├── course.prisma                # Course model
+│   │   ├── course.prisma                # Course model (with imageUrl)
 │   │   ├── module.prisma                # Module model
 │   │   ├── content-item.prisma          # ContentItem model & ContentType enum
 │   │   ├── assignment.prisma            # Assignment model & SubmissionPolicy enum
@@ -84,23 +92,39 @@ backend/
 │   │   ├── logger.ts                    # Structured JSON logger with secret redaction
 │   │   └── password.ts                  # Argon2id password hashing and constant-time verification
 │   ├── middleware/
-│   │   ├── authenticate.ts              # JWT extraction, verification & DB user resolution
+│   │   ├── authenticate.ts              # Strict and optional JWT authentication middleware
 │   │   ├── authorize.ts                 # Role-based access control (requireRole)
 │   │   ├── error-handler.ts             # Central error handling middleware (Zod & AppError)
 │   │   ├── not-found.ts                 # 404 handler for unmatched routes
 │   │   ├── request-context.ts           # Correlation ID (X-Request-Id) and latency logger
 │   │   └── validate.ts                  # Zod request body/query/params validation middleware
 │   ├── models/
-│   │   ├── index.ts                     # Domain entity type re-exports from Prisma
-│   │   └── README.md                    # Documentation on prisma/models vs src/models
+│   │   └── index.ts                     # Domain entity type re-exports from Prisma
 │   ├── modules/
 │   │   ├── auth/                        # Authentication & authorization module
-│   │   │   ├── auth.controller.ts       # HTTP handlers (signup, login, me)
-│   │   │   ├── auth.repository.ts       # User persistence and lookups
-│   │   │   ├── auth.routes.ts           # Auth router with rate limiting and validation
-│   │   │   ├── auth.schema.ts           # Zod schemas (signupSchema, loginSchema)
-│   │   │   ├── auth.service.ts          # Core auth business logic & sanitization
-│   │   │   ├── auth.types.ts            # DTOs and interface definitions
+│   │   ├── courses/                     # Course module (CRUD, pagination, slug generation)
+│   │   │   ├── courses.controller.ts
+│   │   │   ├── courses.repository.ts
+│   │   │   ├── courses.routes.ts
+│   │   │   ├── courses.schema.ts
+│   │   │   ├── courses.service.ts
+│   │   │   ├── courses.types.ts
+│   │   │   └── index.ts
+│   │   ├── modules/                     # Module management (CRUD, reordering, ordering)
+│   │   │   ├── modules.controller.ts
+│   │   │   ├── modules.repository.ts
+│   │   │   ├── modules.routes.ts
+│   │   │   ├── modules.schema.ts
+│   │   │   ├── modules.service.ts
+│   │   │   ├── modules.types.ts
+│   │   │   └── index.ts
+│   │   ├── content/                     # Content item management (CRUD, reordering, types)
+│   │   │   ├── content.controller.ts
+│   │   │   ├── content.repository.ts
+│   │   │   ├── content.routes.ts
+│   │   │   ├── content.schema.ts
+│   │   │   ├── content.service.ts
+│   │   │   ├── content.types.ts
 │   │   │   └── index.ts
 │   │   ├── health/                      # Health module (liveness & readiness)
 │   │   └── rate-limit/                  # Database-backed rate limiting module
@@ -111,96 +135,109 @@ backend/
 │   │   ├── cleanup-rate-limits.ts       # Bounded batch deletion of expired rate limit entries
 │   │   ├── seed.ts                      # Idempotent mentor and administrator database seeder
 │   │   └── verify-db.ts                 # Direct database connectivity probe
-│   └── types/
-│       └── express.d.ts                 # Express.Request augmentation (req.user, req.id)
+│   ├── types/
+│   │   └── express.d.ts                 # Express.Request augmentation (req.user, req.id)
+│   └── utils/
+│       ├── pagination.ts                # Safe pagination calculator
+│       └── slug.ts                      # URL slug generator
 └── tests/
-    ├── app.test.ts                      # Foundation & health check tests
+    ├── app.test.ts                      # Foundation & health check tests (9 tests)
     ├── auth.test.ts                     # Auth, Argon2id, JWT, Roles & Seed tests (32 tests)
-    ├── base-repository.test.ts          # Generic repository CRUD tests
-    ├── rate-limit-db.test.ts            # PostgreSQL concurrency & expiry tests
-    ├── rate-limit.test.ts               # In-memory rate limiting middleware tests
-    └── utils.test.ts                    # Pagination & utility unit tests
+    ├── base-repository.test.ts          # Generic repository CRUD tests (8 tests)
+    ├── course-module-content.test.ts    # Course, Module & Content full integration suite (25 tests)
+    ├── rate-limit-db.test.ts            # PostgreSQL concurrency & expiry tests (2 tests)
+    ├── rate-limit.test.ts               # In-memory rate limiting middleware tests (15 tests)
+    └── utils.test.ts                    # Pagination & utility unit tests (5 tests)
 ```
 
 ---
 
-## 3. Authentication & Authorization Specifications
+## 3. Course, Module & Content API Reference
 
-### Endpoints
+### Course Endpoints
 
-| Method | Endpoint | Protection | Description | Rate Limit |
-|---|---|---|---|---|
-| `POST` | `/api/v1/auth/signup` | Public | Registers a new student account | 10 requests / 15 mins |
-| `POST` | `/api/v1/auth/login` | Public | Authenticates student, mentor, or admin | 10 requests / 15 mins |
-| `GET` | `/api/v1/auth/me` | Bearer JWT | Returns current authenticated user profile | General API limit |
-
-### Security Guarantees
-
-1. **Privilege Escalation Prevention**:
-   - The public signup endpoint strictly hardcodes `role: Role.STUDENT`.
-   - Any client-supplied `role` parameter in the request payload is stripped and ignored.
-2. **Timing-Safe Generic Login Failures**:
-   - Attempting to log in with an unregistered email returns HTTP 401 with `INVALID_CREDENTIALS` ("Invalid email or password").
-   - Attempting to log in with an incorrect password returns the identical HTTP 401 and code, completely preventing user enumeration.
-3. **Deactivated Accounts**:
-   - When `isActive: false`, login attempts are rejected with HTTP 401 `ACCOUNT_DEACTIVATED`.
-   - The `authenticate` middleware checks `user.isActive` against the live database on every protected request, instantly revoking access if an account is disabled.
-4. **Password Security**:
-   - Algorithm: **Argon2id** (`type: argon2.argon2id`)
-   - Parameters: Memory cost: 65,536 KB (64 MB), Time cost: 3 iterations, Parallelism: 1 thread.
-   - Length limits: Minimum 8 characters, maximum 128 characters.
-   - Plaintext passwords and password hashes are never logged and never included in API response envelopes.
-5. **JSON Web Tokens (JWT)**:
-   - Algorithm: `HS256` (HMAC SHA-256)
-   - Secret: Validated at startup via `JWT_SECRET` (minimum 32 characters in production).
-   - Lifetime: 15 minutes by default (`JWT_EXPIRES_IN`).
-   - Claims: `sub` (User ID), `email`, `role`, `name`.
-6. **Role-Based Authorization**:
-   - Middleware: `requireRole(Role.ADMIN)` or `requireRole(Role.MENTOR, Role.ADMIN)`.
-   - Returns HTTP 403 `FORBIDDEN` ("You do not have permission to access this resource") when the user lacks required roles.
-
----
-
-## 4. Database Seeding (`npm run db:seed`)
-
-The backend includes an idempotent seeding script to provision initial administrative and mentor accounts without risking data corruption or duplicates:
-
-```bash
-npm run db:seed
-```
-
-### Seed Behavior & Idempotency:
-- Reads credentials from environment variables (`SEED_MENTOR_EMAIL`, `SEED_MENTOR_PASSWORD`, `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`).
-- Checks if the user already exists in PostgreSQL before creating.
-- If not found, securely hashes the password with Argon2id and creates the user with the respective role (`Role.MENTOR` or `Role.ADMIN`).
-- If the account already exists, confirms role permissions and active status without duplicating records.
-- Plaintext passwords are never logged to console or logs.
-
----
-
-## 5. Environment Variables Reference
-
-| Variable | Type | Default | Description |
+| Method | Endpoint | Authorization | Description |
 |---|---|---|---|
-| `NODE_ENV` | `'development' \| 'test' \| 'production'` | `'development'` | Runtime environment |
-| `PORT` | `number` | `5000` | Server listening port |
-| `CORS_ORIGIN` | `string` | `http://localhost:3000` | Allowed CORS origins |
-| `DATABASE_URL` | `string` | — | Neon pooled connection string for runtime queries |
-| `DIRECT_URL` | `string` | — | Neon direct connection string for Prisma migrations |
-| `RATE_LIMIT_ENABLED` | `boolean` | `true` | Enable or disable rate limiting globally |
-| `RATE_LIMIT_WINDOW_MS` | `number` | `120000` (2 mins) | Default rate limit window in milliseconds |
-| `RATE_LIMIT_MAX_REQUESTS` | `number` | `100` | Default maximum requests allowed per window |
-| `RATE_LIMIT_CLEANUP_BATCH_SIZE` | `number` | `1000` | Maximum rows deleted in a single cleanup batch |
-| `JWT_SECRET` | `string` | `...dev_secret...` | HMAC secret for signing JWTs (min 32 chars in prod) |
-| `JWT_EXPIRES_IN` | `string` | `'15m'` | Expiration duration for access tokens |
-| `SEED_MENTOR_EMAIL` | `string` | `'mentor@projectpilot.dev'` | Default mentor email for seeding |
-| `SEED_MENTOR_PASSWORD` | `string` | `'MentorSecret2026!'` | Default mentor password for seeding |
-| `SEED_ADMIN_EMAIL` | `string` | `'admin@projectpilot.dev'` | Default admin email for seeding |
-| `SEED_ADMIN_PASSWORD` | `string` | `'AdminSecret2026!'` | Default admin password for seeding |
+| `GET` | `/api/v1/courses` | Public / Student / Mentor | Lists published courses (or all if Mentor/Admin) with pagination |
+| `GET` | `/api/v1/courses/:courseId` | Public / Student / Mentor | Retrieves course detail by UUID or slug with nested ordered modules |
+| `POST` | `/api/v1/courses` | `MENTOR`, `ADMIN` | Creates a new course (auto-generates slug if omitted) |
+| `PATCH` | `/api/v1/courses/:courseId` | `MENTOR`, `ADMIN` | Updates course metadata or publication status |
+| `DELETE` | `/api/v1/courses/:courseId` | `MENTOR`, `ADMIN` | Deletes a course and cascades child modules/content |
+
+### Module Endpoints
+
+| Method | Endpoint | Authorization | Description |
+|---|---|---|---|
+| `POST` | `/api/v1/courses/:courseId/modules` | `MENTOR`, `ADMIN` | Creates a module (appends to end if `order` omitted) |
+| `GET` | `/api/v1/courses/:courseId/modules` | Public / Student / Mentor | Lists modules for course in deterministic order |
+| `PATCH` | `/api/v1/courses/:courseId/modules/reorder` | `MENTOR`, `ADMIN` | Reorders modules safely within a parent course |
+| `GET` | `/api/v1/modules/:moduleId` | Public / Student / Mentor | Retrieves module detail with ordered content items |
+| `PATCH` | `/api/v1/modules/:moduleId` | `MENTOR`, `ADMIN` | Updates module title, description, or publication status |
+| `DELETE` | `/api/v1/modules/:moduleId` | `MENTOR`, `ADMIN` | Deletes module and cascades its content items |
+
+### Content Item Endpoints
+
+| Method | Endpoint | Authorization | Description |
+|---|---|---|---|
+| `POST` | `/api/v1/modules/:moduleId/content` | `MENTOR`, `ADMIN` | Creates content item (appends to end if `order` omitted) |
+| `GET` | `/api/v1/modules/:moduleId/content` | Public / Student / Mentor | Lists content items for a module in deterministic order |
+| `PATCH` | `/api/v1/modules/:moduleId/content/reorder` | `MENTOR`, `ADMIN` | Reorders content items safely within a module |
+| `GET` | `/api/v1/content/:contentId` | Public / Student / Mentor | Retrieves individual content item |
+| `PATCH` | `/api/v1/content/:contentId` | `MENTOR`, `ADMIN` | Updates content title, payload, URL, or type |
+| `DELETE` | `/api/v1/content/:contentId` | `MENTOR`, `ADMIN` | Deletes a content item |
 
 ---
 
-## 6. Development & Production Commands
+## 4. Deterministic Ordering & Two-Phase Transaction Safety
+
+Both `Module` and `ContentItem` models have database unique constraints:
+- `@@unique([courseId, order])` on `modules`
+- `@@unique([moduleId, order])` on `content_items`
+
+### The Collision Problem:
+When updating positions in an arbitrary sequence (e.g., swapping items at orders 1 and 2), updating item A to order 1 while item B still occupies order 1 causes PostgreSQL to throw:
+`duplicate key value violates unique constraint "modules_courseId_order_key"`.
+
+### The Two-Phase Update Solution:
+All reorder operations execute inside an atomic database transaction (`prisma.$transaction`):
+1. **Validation**: Confirms the input contains the complete, exact set of IDs for that parent (no missing, no foreign, no duplicates).
+2. **Phase 1 (Temporary Negative Offsets)**: Updates each item's order to `- (index + 1000)`. Because all active orders are positive numbers, negative orders never collide with existing entries or each other.
+3. **Phase 2 (Final Sequential Normalization)**: Updates each item to its final target positive order (`1, 2, 3...`).
+4. **Result**: The final order is 100% deterministic, collision-free, and transactional.
+
+### Append-to-End by Default:
+When a module or content item is created without specifying an order:
+- The system queries `MAX("order")` for that parent.
+- Automatically assigns `order = (maxOrder ?? 0) + 1`.
+
+---
+
+## 5. Supported Content Types & Payload Validation
+
+| Type | Required Fields | Validation Rules |
+|---|---|---|
+| `YOUTUBE_VIDEO` | `url` | Must be a valid HTTP/HTTPS URL pointing to YouTube (`youtube.com` or `youtu.be`) or video resource |
+| `VIDEO` | `url` | Must be a valid HTTP or HTTPS video resource URL |
+| `LINK` | `url` | Must be a valid HTTP or HTTPS external URL |
+| `TEXT` | `body` | Must be a non-empty string lesson body |
+| `ASSIGNMENT` | `assignmentId` | Must be a valid UUID referencing an existing `Assignment` in the database |
+
+---
+
+## 6. Publication Access Control Matrix
+
+| Action | Student / Public | Mentor | Admin |
+|---|---|---|---|
+| List published courses | Yes | Yes | Yes |
+| View published course detail & modules | Yes | Yes | Yes |
+| View draft course / modules / content | **No (Returns 404 Not Found)** | Yes | Yes |
+| Create / Update / Delete courses | **No (403 Forbidden)** | Yes | Yes |
+| Create / Update / Delete / Reorder modules | **No (403 Forbidden)** | Yes | Yes |
+| Create / Update / Delete / Reorder content | **No (403 Forbidden)** | Yes | Yes |
+
+---
+
+## 7. Development & Production Commands
 
 | Command | Action |
 |---|---|
@@ -209,7 +246,7 @@ npm run db:seed
 | `npm start` | Executes compiled production server (`node dist/server.js`) |
 | `npm run typecheck` | Validates TypeScript types across the project (`tsc --noEmit`) |
 | `npm run lint` | Runs ESLint across the codebase |
-| `npm test` | Runs all Vitest test suites (71 tests across 6 files) |
+| `npm test` | Runs all Vitest test suites (96 tests across 7 test files) |
 | `npm run db:seed` | Idempotently provisions initial mentor and admin accounts |
 | `npm run prisma:generate` | Generates Prisma v7 Client into `src/generated/prisma` |
 | `npm run prisma:validate` | Validates multi-file schemas in `prisma/` against `prisma.config.ts` |
@@ -219,21 +256,8 @@ npm run db:seed
 
 ---
 
-## 7. Health Endpoints
+## 8. Deferred Behaviors Documented
 
-- **Liveness Probe (`GET /api/v1/health`)**:
-  - Always exempt from rate limiting.
-  - Returns `200 OK` confirming the HTTP server process is responsive.
-- **Readiness Probe (`GET /api/v1/health/ready`)**:
-  - Probes live database connectivity (`SELECT 1`).
-  - Returns `200 OK` when connected, or `503 Service Unavailable` if unreachable.
-
----
-
-## 8. Vercel Serverless Deployment
-
-The project is structured for native Vercel deployment:
-- Entry point: [`api/index.ts`](file:///C:/Currently%20Working/PHT/Backend/api/index.ts) exports the listener-free Express `app`.
-- Routing: [`vercel.json`](file:///C:/Currently%20Working/PHT/Backend/vercel.json) rewrites all requests to `/api/index.ts`.
-- Trust proxy enabled (`app.set('trust proxy', 1)`) for accurate IP resolution behind Vercel edge routers.
-- Scheduled cleanup can be triggered via a Vercel Cron invoking a maintenance endpoint or task.
+- **Course Ownership**: Currently, all mentors and administrators share full management access to all courses, modules, and content items. Granular per-mentor ownership or collaboration permissions will be introduced in subsequent phases.
+- **Student Enrollment**: Publicly visible published courses are accessible for reading by all authenticated students. Restricting access to enrolled students only will be governed by the upcoming enrollment module.
+- **Assignment Submissions**: Content items of type `ASSIGNMENT` reference assignments by `assignmentId`. Full assignment attempt histories and mentor review workflows will be handled in the assignment/submission phase.

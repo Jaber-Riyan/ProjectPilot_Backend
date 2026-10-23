@@ -29,6 +29,7 @@ export type CourseMinAggregateOutputType = {
   title: string | null
   slug: string | null
   description: string | null
+  imageUrl: string | null
   isPublished: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -39,6 +40,7 @@ export type CourseMaxAggregateOutputType = {
   title: string | null
   slug: string | null
   description: string | null
+  imageUrl: string | null
   isPublished: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -49,6 +51,7 @@ export type CourseCountAggregateOutputType = {
   title: number
   slug: number
   description: number
+  imageUrl: number
   isPublished: number
   createdAt: number
   updatedAt: number
@@ -61,6 +64,7 @@ export type CourseMinAggregateInputType = {
   title?: true
   slug?: true
   description?: true
+  imageUrl?: true
   isPublished?: true
   createdAt?: true
   updatedAt?: true
@@ -71,6 +75,7 @@ export type CourseMaxAggregateInputType = {
   title?: true
   slug?: true
   description?: true
+  imageUrl?: true
   isPublished?: true
   createdAt?: true
   updatedAt?: true
@@ -81,6 +86,7 @@ export type CourseCountAggregateInputType = {
   title?: true
   slug?: true
   description?: true
+  imageUrl?: true
   isPublished?: true
   createdAt?: true
   updatedAt?: true
@@ -164,6 +170,7 @@ export type CourseGroupByOutputType = {
   title: string
   slug: string
   description: string | null
+  imageUrl: string | null
   isPublished: boolean
   createdAt: Date
   updatedAt: Date
@@ -195,6 +202,7 @@ export type CourseWhereInput = {
   title?: Prisma.StringFilter<"Course"> | string
   slug?: Prisma.StringFilter<"Course"> | string
   description?: Prisma.StringNullableFilter<"Course"> | string | null
+  imageUrl?: Prisma.StringNullableFilter<"Course"> | string | null
   isPublished?: Prisma.BoolFilter<"Course"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Course"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Course"> | Date | string
@@ -206,6 +214,7 @@ export type CourseOrderByWithRelationInput = {
   title?: Prisma.SortOrder
   slug?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
+  imageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   isPublished?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -220,6 +229,7 @@ export type CourseWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.CourseWhereInput | Prisma.CourseWhereInput[]
   title?: Prisma.StringFilter<"Course"> | string
   description?: Prisma.StringNullableFilter<"Course"> | string | null
+  imageUrl?: Prisma.StringNullableFilter<"Course"> | string | null
   isPublished?: Prisma.BoolFilter<"Course"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Course"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Course"> | Date | string
@@ -231,6 +241,7 @@ export type CourseOrderByWithAggregationInput = {
   title?: Prisma.SortOrder
   slug?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
+  imageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   isPublished?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -247,6 +258,7 @@ export type CourseScalarWhereWithAggregatesInput = {
   title?: Prisma.StringWithAggregatesFilter<"Course"> | string
   slug?: Prisma.StringWithAggregatesFilter<"Course"> | string
   description?: Prisma.StringNullableWithAggregatesFilter<"Course"> | string | null
+  imageUrl?: Prisma.StringNullableWithAggregatesFilter<"Course"> | string | null
   isPublished?: Prisma.BoolWithAggregatesFilter<"Course"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Course"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Course"> | Date | string
@@ -257,6 +269,7 @@ export type CourseCreateInput = {
   title: string
   slug: string
   description?: string | null
+  imageUrl?: string | null
   isPublished?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -268,6 +281,7 @@ export type CourseUncheckedCreateInput = {
   title: string
   slug: string
   description?: string | null
+  imageUrl?: string | null
   isPublished?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -279,6 +293,7 @@ export type CourseUpdateInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -290,6 +305,7 @@ export type CourseUncheckedUpdateInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -301,6 +317,7 @@ export type CourseCreateManyInput = {
   title: string
   slug: string
   description?: string | null
+  imageUrl?: string | null
   isPublished?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -311,6 +328,7 @@ export type CourseUpdateManyMutationInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -321,6 +339,7 @@ export type CourseUncheckedUpdateManyInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -331,6 +350,7 @@ export type CourseCountOrderByAggregateInput = {
   title?: Prisma.SortOrder
   slug?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  imageUrl?: Prisma.SortOrder
   isPublished?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -341,6 +361,7 @@ export type CourseMaxOrderByAggregateInput = {
   title?: Prisma.SortOrder
   slug?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  imageUrl?: Prisma.SortOrder
   isPublished?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -351,6 +372,7 @@ export type CourseMinOrderByAggregateInput = {
   title?: Prisma.SortOrder
   slug?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  imageUrl?: Prisma.SortOrder
   isPublished?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -380,6 +402,7 @@ export type CourseCreateWithoutModulesInput = {
   title: string
   slug: string
   description?: string | null
+  imageUrl?: string | null
   isPublished?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -390,6 +413,7 @@ export type CourseUncheckedCreateWithoutModulesInput = {
   title: string
   slug: string
   description?: string | null
+  imageUrl?: string | null
   isPublished?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -416,6 +440,7 @@ export type CourseUpdateWithoutModulesInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -426,6 +451,7 @@ export type CourseUncheckedUpdateWithoutModulesInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -467,6 +493,7 @@ export type CourseSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   title?: boolean
   slug?: boolean
   description?: boolean
+  imageUrl?: boolean
   isPublished?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -479,6 +506,7 @@ export type CourseSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   title?: boolean
   slug?: boolean
   description?: boolean
+  imageUrl?: boolean
   isPublished?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -489,6 +517,7 @@ export type CourseSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   title?: boolean
   slug?: boolean
   description?: boolean
+  imageUrl?: boolean
   isPublished?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -499,12 +528,13 @@ export type CourseSelectScalar = {
   title?: boolean
   slug?: boolean
   description?: boolean
+  imageUrl?: boolean
   isPublished?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type CourseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "slug" | "description" | "isPublished" | "createdAt" | "updatedAt", ExtArgs["result"]["course"]>
+export type CourseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "slug" | "description" | "imageUrl" | "isPublished" | "createdAt" | "updatedAt", ExtArgs["result"]["course"]>
 export type CourseInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   modules?: boolean | Prisma.Course$modulesArgs<ExtArgs>
   _count?: boolean | Prisma.CourseCountOutputTypeDefaultArgs<ExtArgs>
@@ -522,6 +552,7 @@ export type $CoursePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     title: string
     slug: string
     description: string | null
+    imageUrl: string | null
     isPublished: boolean
     createdAt: Date
     updatedAt: Date
@@ -953,6 +984,7 @@ export interface CourseFieldRefs {
   readonly title: Prisma.FieldRef<"Course", 'String'>
   readonly slug: Prisma.FieldRef<"Course", 'String'>
   readonly description: Prisma.FieldRef<"Course", 'String'>
+  readonly imageUrl: Prisma.FieldRef<"Course", 'String'>
   readonly isPublished: Prisma.FieldRef<"Course", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"Course", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Course", 'DateTime'>

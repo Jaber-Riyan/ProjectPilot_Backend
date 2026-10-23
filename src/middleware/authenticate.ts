@@ -68,4 +68,61 @@ export function createAuthenticateMiddleware(
   };
 }
 
+/**
+ * Optional authentication middleware:
+ * If an Authorization header is provided, verifies token and populates req.user.
+ * If no Authorization header is provided, permits the request to continue as unauthenticated.
+ */
+export function createOptionalAuthenticateMiddleware(
+  repo: AuthRepository = authRepository
+): RequestHandler {
+  return async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader) {
+        return next();
+      }
+
+      const match = authHeader.match(/^Bearer\s+(.+)$/i);
+      if (!match || !match[1]) {
+        return next();
+      }
+
+      const token = match[1].trim();
+      let payload;
+      try {
+        payload = verifyToken(token);
+      } catch {
+        throw AppError.unauthorized('Invalid or expired authentication token', 'UNAUTHORIZED');
+      }
+
+      if (!payload.sub) {
+        throw AppError.unauthorized('Invalid token payload: missing subject', 'UNAUTHORIZED');
+      }
+
+      const user = await repo.findById(payload.sub);
+      if (!user || !user.isActive) {
+        throw AppError.unauthorized(
+          'User associated with this token was not found or is deactivated',
+          'UNAUTHORIZED'
+        );
+      }
+
+      req.user = {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        isActive: user.isActive,
+        createdAt: user.createdAt,
+      };
+
+      next();
+    } catch (error) {
+      next(error);
+    }
+  };
+}
+
 export const authenticate = createAuthenticateMiddleware();
+export const optionalAuthenticate = createOptionalAuthenticateMiddleware();

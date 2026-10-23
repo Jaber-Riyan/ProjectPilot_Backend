@@ -216,6 +216,7 @@ export type AssignmentWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Assignment"> | Date | string
   module?: Prisma.XOR<Prisma.ModuleScalarRelationFilter, Prisma.ModuleWhereInput>
   submissions?: Prisma.SubmissionListRelationFilter
+  contentItems?: Prisma.ContentItemListRelationFilter
 }
 
 export type AssignmentOrderByWithRelationInput = {
@@ -230,6 +231,7 @@ export type AssignmentOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   module?: Prisma.ModuleOrderByWithRelationInput
   submissions?: Prisma.SubmissionOrderByRelationAggregateInput
+  contentItems?: Prisma.ContentItemOrderByRelationAggregateInput
 }
 
 export type AssignmentWhereUniqueInput = Prisma.AtLeast<{
@@ -247,6 +249,7 @@ export type AssignmentWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"Assignment"> | Date | string
   module?: Prisma.XOR<Prisma.ModuleScalarRelationFilter, Prisma.ModuleWhereInput>
   submissions?: Prisma.SubmissionListRelationFilter
+  contentItems?: Prisma.ContentItemListRelationFilter
 }, "id">
 
 export type AssignmentOrderByWithAggregationInput = {
@@ -290,6 +293,7 @@ export type AssignmentCreateInput = {
   updatedAt?: Date | string
   module: Prisma.ModuleCreateNestedOneWithoutAssignmentsInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutAssignmentInput
+  contentItems?: Prisma.ContentItemCreateNestedManyWithoutAssignmentInput
 }
 
 export type AssignmentUncheckedCreateInput = {
@@ -303,6 +307,7 @@ export type AssignmentUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutAssignmentInput
+  contentItems?: Prisma.ContentItemUncheckedCreateNestedManyWithoutAssignmentInput
 }
 
 export type AssignmentUpdateInput = {
@@ -316,6 +321,7 @@ export type AssignmentUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   module?: Prisma.ModuleUpdateOneRequiredWithoutAssignmentsNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutAssignmentNestedInput
+  contentItems?: Prisma.ContentItemUpdateManyWithoutAssignmentNestedInput
 }
 
 export type AssignmentUncheckedUpdateInput = {
@@ -329,6 +335,7 @@ export type AssignmentUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutAssignmentNestedInput
+  contentItems?: Prisma.ContentItemUncheckedUpdateManyWithoutAssignmentNestedInput
 }
 
 export type AssignmentCreateManyInput = {
@@ -402,6 +409,11 @@ export type AssignmentMinOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
 }
 
+export type AssignmentNullableScalarRelationFilter = {
+  is?: Prisma.AssignmentWhereInput | null
+  isNot?: Prisma.AssignmentWhereInput | null
+}
+
 export type AssignmentListRelationFilter = {
   every?: Prisma.AssignmentWhereInput
   some?: Prisma.AssignmentWhereInput
@@ -435,6 +447,22 @@ export type NullableDateTimeFieldUpdateOperationsInput = {
 
 export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
+}
+
+export type AssignmentCreateNestedOneWithoutContentItemsInput = {
+  create?: Prisma.XOR<Prisma.AssignmentCreateWithoutContentItemsInput, Prisma.AssignmentUncheckedCreateWithoutContentItemsInput>
+  connectOrCreate?: Prisma.AssignmentCreateOrConnectWithoutContentItemsInput
+  connect?: Prisma.AssignmentWhereUniqueInput
+}
+
+export type AssignmentUpdateOneWithoutContentItemsNestedInput = {
+  create?: Prisma.XOR<Prisma.AssignmentCreateWithoutContentItemsInput, Prisma.AssignmentUncheckedCreateWithoutContentItemsInput>
+  connectOrCreate?: Prisma.AssignmentCreateOrConnectWithoutContentItemsInput
+  upsert?: Prisma.AssignmentUpsertWithoutContentItemsInput
+  disconnect?: Prisma.AssignmentWhereInput | boolean
+  delete?: Prisma.AssignmentWhereInput | boolean
+  connect?: Prisma.AssignmentWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AssignmentUpdateToOneWithWhereWithoutContentItemsInput, Prisma.AssignmentUpdateWithoutContentItemsInput>, Prisma.AssignmentUncheckedUpdateWithoutContentItemsInput>
 }
 
 export type AssignmentCreateNestedManyWithoutModuleInput = {
@@ -493,6 +521,74 @@ export type AssignmentUpdateOneRequiredWithoutSubmissionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.AssignmentUpdateToOneWithWhereWithoutSubmissionsInput, Prisma.AssignmentUpdateWithoutSubmissionsInput>, Prisma.AssignmentUncheckedUpdateWithoutSubmissionsInput>
 }
 
+export type AssignmentCreateWithoutContentItemsInput = {
+  id?: string
+  title: string
+  instructions: string
+  submissionPolicy?: $Enums.SubmissionPolicy
+  isPublished?: boolean
+  dueAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  module: Prisma.ModuleCreateNestedOneWithoutAssignmentsInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutAssignmentInput
+}
+
+export type AssignmentUncheckedCreateWithoutContentItemsInput = {
+  id?: string
+  moduleId: string
+  title: string
+  instructions: string
+  submissionPolicy?: $Enums.SubmissionPolicy
+  isPublished?: boolean
+  dueAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutAssignmentInput
+}
+
+export type AssignmentCreateOrConnectWithoutContentItemsInput = {
+  where: Prisma.AssignmentWhereUniqueInput
+  create: Prisma.XOR<Prisma.AssignmentCreateWithoutContentItemsInput, Prisma.AssignmentUncheckedCreateWithoutContentItemsInput>
+}
+
+export type AssignmentUpsertWithoutContentItemsInput = {
+  update: Prisma.XOR<Prisma.AssignmentUpdateWithoutContentItemsInput, Prisma.AssignmentUncheckedUpdateWithoutContentItemsInput>
+  create: Prisma.XOR<Prisma.AssignmentCreateWithoutContentItemsInput, Prisma.AssignmentUncheckedCreateWithoutContentItemsInput>
+  where?: Prisma.AssignmentWhereInput
+}
+
+export type AssignmentUpdateToOneWithWhereWithoutContentItemsInput = {
+  where?: Prisma.AssignmentWhereInput
+  data: Prisma.XOR<Prisma.AssignmentUpdateWithoutContentItemsInput, Prisma.AssignmentUncheckedUpdateWithoutContentItemsInput>
+}
+
+export type AssignmentUpdateWithoutContentItemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  instructions?: Prisma.StringFieldUpdateOperationsInput | string
+  submissionPolicy?: Prisma.EnumSubmissionPolicyFieldUpdateOperationsInput | $Enums.SubmissionPolicy
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  module?: Prisma.ModuleUpdateOneRequiredWithoutAssignmentsNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutAssignmentNestedInput
+}
+
+export type AssignmentUncheckedUpdateWithoutContentItemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  moduleId?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  instructions?: Prisma.StringFieldUpdateOperationsInput | string
+  submissionPolicy?: Prisma.EnumSubmissionPolicyFieldUpdateOperationsInput | $Enums.SubmissionPolicy
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutAssignmentNestedInput
+}
+
 export type AssignmentCreateWithoutModuleInput = {
   id?: string
   title: string
@@ -503,6 +599,7 @@ export type AssignmentCreateWithoutModuleInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   submissions?: Prisma.SubmissionCreateNestedManyWithoutAssignmentInput
+  contentItems?: Prisma.ContentItemCreateNestedManyWithoutAssignmentInput
 }
 
 export type AssignmentUncheckedCreateWithoutModuleInput = {
@@ -515,6 +612,7 @@ export type AssignmentUncheckedCreateWithoutModuleInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutAssignmentInput
+  contentItems?: Prisma.ContentItemUncheckedCreateNestedManyWithoutAssignmentInput
 }
 
 export type AssignmentCreateOrConnectWithoutModuleInput = {
@@ -568,6 +666,7 @@ export type AssignmentCreateWithoutSubmissionsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   module: Prisma.ModuleCreateNestedOneWithoutAssignmentsInput
+  contentItems?: Prisma.ContentItemCreateNestedManyWithoutAssignmentInput
 }
 
 export type AssignmentUncheckedCreateWithoutSubmissionsInput = {
@@ -580,6 +679,7 @@ export type AssignmentUncheckedCreateWithoutSubmissionsInput = {
   dueAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  contentItems?: Prisma.ContentItemUncheckedCreateNestedManyWithoutAssignmentInput
 }
 
 export type AssignmentCreateOrConnectWithoutSubmissionsInput = {
@@ -608,6 +708,7 @@ export type AssignmentUpdateWithoutSubmissionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   module?: Prisma.ModuleUpdateOneRequiredWithoutAssignmentsNestedInput
+  contentItems?: Prisma.ContentItemUpdateManyWithoutAssignmentNestedInput
 }
 
 export type AssignmentUncheckedUpdateWithoutSubmissionsInput = {
@@ -620,6 +721,7 @@ export type AssignmentUncheckedUpdateWithoutSubmissionsInput = {
   dueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  contentItems?: Prisma.ContentItemUncheckedUpdateManyWithoutAssignmentNestedInput
 }
 
 export type AssignmentCreateManyModuleInput = {
@@ -643,6 +745,7 @@ export type AssignmentUpdateWithoutModuleInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissions?: Prisma.SubmissionUpdateManyWithoutAssignmentNestedInput
+  contentItems?: Prisma.ContentItemUpdateManyWithoutAssignmentNestedInput
 }
 
 export type AssignmentUncheckedUpdateWithoutModuleInput = {
@@ -655,6 +758,7 @@ export type AssignmentUncheckedUpdateWithoutModuleInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutAssignmentNestedInput
+  contentItems?: Prisma.ContentItemUncheckedUpdateManyWithoutAssignmentNestedInput
 }
 
 export type AssignmentUncheckedUpdateManyWithoutModuleInput = {
@@ -675,10 +779,12 @@ export type AssignmentUncheckedUpdateManyWithoutModuleInput = {
 
 export type AssignmentCountOutputType = {
   submissions: number
+  contentItems: number
 }
 
 export type AssignmentCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   submissions?: boolean | AssignmentCountOutputTypeCountSubmissionsArgs
+  contentItems?: boolean | AssignmentCountOutputTypeCountContentItemsArgs
 }
 
 /**
@@ -698,6 +804,13 @@ export type AssignmentCountOutputTypeCountSubmissionsArgs<ExtArgs extends runtim
   where?: Prisma.SubmissionWhereInput
 }
 
+/**
+ * AssignmentCountOutputType without action
+ */
+export type AssignmentCountOutputTypeCountContentItemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ContentItemWhereInput
+}
+
 
 export type AssignmentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -711,6 +824,7 @@ export type AssignmentSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   updatedAt?: boolean
   module?: boolean | Prisma.ModuleDefaultArgs<ExtArgs>
   submissions?: boolean | Prisma.Assignment$submissionsArgs<ExtArgs>
+  contentItems?: boolean | Prisma.Assignment$contentItemsArgs<ExtArgs>
   _count?: boolean | Prisma.AssignmentCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["assignment"]>
 
@@ -756,6 +870,7 @@ export type AssignmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs
 export type AssignmentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   module?: boolean | Prisma.ModuleDefaultArgs<ExtArgs>
   submissions?: boolean | Prisma.Assignment$submissionsArgs<ExtArgs>
+  contentItems?: boolean | Prisma.Assignment$contentItemsArgs<ExtArgs>
   _count?: boolean | Prisma.AssignmentCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type AssignmentIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -770,6 +885,7 @@ export type $AssignmentPayload<ExtArgs extends runtime.Types.Extensions.Internal
   objects: {
     module: Prisma.$ModulePayload<ExtArgs>
     submissions: Prisma.$SubmissionPayload<ExtArgs>[]
+    contentItems: Prisma.$ContentItemPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1177,6 +1293,7 @@ export interface Prisma__AssignmentClient<T, Null = never, ExtArgs extends runti
   readonly [Symbol.toStringTag]: "PrismaPromise"
   module<T extends Prisma.ModuleDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ModuleDefaultArgs<ExtArgs>>): Prisma.Prisma__ModuleClient<runtime.Types.Result.GetResult<Prisma.$ModulePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   submissions<T extends Prisma.Assignment$submissionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Assignment$submissionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  contentItems<T extends Prisma.Assignment$contentItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Assignment$contentItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ContentItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1637,6 +1754,30 @@ export type Assignment$submissionsArgs<ExtArgs extends runtime.Types.Extensions.
   take?: number
   skip?: number
   distinct?: Prisma.SubmissionScalarFieldEnum | Prisma.SubmissionScalarFieldEnum[]
+}
+
+/**
+ * Assignment.contentItems
+ */
+export type Assignment$contentItemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ContentItem
+   */
+  select?: Prisma.ContentItemSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ContentItem
+   */
+  omit?: Prisma.ContentItemOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ContentItemInclude<ExtArgs> | null
+  where?: Prisma.ContentItemWhereInput
+  orderBy?: Prisma.ContentItemOrderByWithRelationInput | Prisma.ContentItemOrderByWithRelationInput[]
+  cursor?: Prisma.ContentItemWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ContentItemScalarFieldEnum | Prisma.ContentItemScalarFieldEnum[]
 }
 
 /**

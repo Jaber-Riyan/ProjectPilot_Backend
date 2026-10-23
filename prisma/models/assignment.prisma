@@ -15,8 +15,9 @@ model Assignment {
   updatedAt        DateTime         @updatedAt
 
   // Relationships
-  module      Module       @relation(fields: [moduleId], references: [id], onDelete: Cascade)
-  submissions Submission[]
+  module       Module        @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  submissions  Submission[]
+  contentItems ContentItem[]
 
   @@index([moduleId])
   @@index([isPublished])

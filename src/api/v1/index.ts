@@ -1,6 +1,9 @@
 import { Router } from 'express';
 import { healthRoutes } from '../../modules/health/health.routes';
 import { authRoutes } from '../../modules/auth/auth.routes';
+import { courseRoutes } from '../../modules/courses/courses.routes';
+import { moduleRoutes } from '../../modules/modules/modules.routes';
+import { contentRoutes } from '../../modules/content/content.routes';
 import { createRateLimiter } from '../../modules/rate-limit';
 
 const router = Router();
@@ -17,6 +20,11 @@ router.use(
     keyPrefix: 'api-v1',
   })
 );
+
+// 4. Learning Management Feature Routes
+router.use('/courses', courseRoutes);
+router.use('/modules', moduleRoutes);
+router.use('/content', contentRoutes);
 
 export const v1ApiRouter = router;
 export default router;

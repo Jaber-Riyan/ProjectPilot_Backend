@@ -1,24 +1,30 @@
 enum ContentType {
   VIDEO
+  YOUTUBE_VIDEO
   TEXT
   LINK
+  ASSIGNMENT
 }
 
 model ContentItem {
-  id        String      @id @default(uuid()) @db.Uuid
-  moduleId  String      @db.Uuid
-  type      ContentType
-  title     String
-  body      String?     @db.Text
-  url       String?
-  order     Int
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  id           String      @id @default(uuid()) @db.Uuid
+  moduleId     String      @db.Uuid
+  type         ContentType
+  title        String
+  description  String?     @db.Text
+  body         String?     @db.Text
+  url          String?
+  order        Int
+  assignmentId String?     @db.Uuid
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 
   // Relationships
-  module Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  module     Module      @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  assignment Assignment? @relation(fields: [assignmentId], references: [id], onDelete: SetNull)
 
   @@unique([moduleId, order])
   @@index([moduleId])
+  @@index([assignmentId])
   @@map("content_items")
 }

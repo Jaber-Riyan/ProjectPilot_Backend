@@ -39,9 +39,11 @@ export type ContentItemMinAggregateOutputType = {
   moduleId: string | null
   type: $Enums.ContentType | null
   title: string | null
+  description: string | null
   body: string | null
   url: string | null
   order: number | null
+  assignmentId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -51,9 +53,11 @@ export type ContentItemMaxAggregateOutputType = {
   moduleId: string | null
   type: $Enums.ContentType | null
   title: string | null
+  description: string | null
   body: string | null
   url: string | null
   order: number | null
+  assignmentId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -63,9 +67,11 @@ export type ContentItemCountAggregateOutputType = {
   moduleId: number
   type: number
   title: number
+  description: number
   body: number
   url: number
   order: number
+  assignmentId: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -85,9 +91,11 @@ export type ContentItemMinAggregateInputType = {
   moduleId?: true
   type?: true
   title?: true
+  description?: true
   body?: true
   url?: true
   order?: true
+  assignmentId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -97,9 +105,11 @@ export type ContentItemMaxAggregateInputType = {
   moduleId?: true
   type?: true
   title?: true
+  description?: true
   body?: true
   url?: true
   order?: true
+  assignmentId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -109,9 +119,11 @@ export type ContentItemCountAggregateInputType = {
   moduleId?: true
   type?: true
   title?: true
+  description?: true
   body?: true
   url?: true
   order?: true
+  assignmentId?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -208,9 +220,11 @@ export type ContentItemGroupByOutputType = {
   moduleId: string
   type: $Enums.ContentType
   title: string
+  description: string | null
   body: string | null
   url: string | null
   order: number
+  assignmentId: string | null
   createdAt: Date
   updatedAt: Date
   _count: ContentItemCountAggregateOutputType | null
@@ -243,12 +257,15 @@ export type ContentItemWhereInput = {
   moduleId?: Prisma.UuidFilter<"ContentItem"> | string
   type?: Prisma.EnumContentTypeFilter<"ContentItem"> | $Enums.ContentType
   title?: Prisma.StringFilter<"ContentItem"> | string
+  description?: Prisma.StringNullableFilter<"ContentItem"> | string | null
   body?: Prisma.StringNullableFilter<"ContentItem"> | string | null
   url?: Prisma.StringNullableFilter<"ContentItem"> | string | null
   order?: Prisma.IntFilter<"ContentItem"> | number
+  assignmentId?: Prisma.UuidNullableFilter<"ContentItem"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ContentItem"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ContentItem"> | Date | string
   module?: Prisma.XOR<Prisma.ModuleScalarRelationFilter, Prisma.ModuleWhereInput>
+  assignment?: Prisma.XOR<Prisma.AssignmentNullableScalarRelationFilter, Prisma.AssignmentWhereInput> | null
 }
 
 export type ContentItemOrderByWithRelationInput = {
@@ -256,12 +273,15 @@ export type ContentItemOrderByWithRelationInput = {
   moduleId?: Prisma.SortOrder
   type?: Prisma.SortOrder
   title?: Prisma.SortOrder
+  description?: Prisma.SortOrderInput | Prisma.SortOrder
   body?: Prisma.SortOrderInput | Prisma.SortOrder
   url?: Prisma.SortOrderInput | Prisma.SortOrder
   order?: Prisma.SortOrder
+  assignmentId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   module?: Prisma.ModuleOrderByWithRelationInput
+  assignment?: Prisma.AssignmentOrderByWithRelationInput
 }
 
 export type ContentItemWhereUniqueInput = Prisma.AtLeast<{
@@ -273,12 +293,15 @@ export type ContentItemWhereUniqueInput = Prisma.AtLeast<{
   moduleId?: Prisma.UuidFilter<"ContentItem"> | string
   type?: Prisma.EnumContentTypeFilter<"ContentItem"> | $Enums.ContentType
   title?: Prisma.StringFilter<"ContentItem"> | string
+  description?: Prisma.StringNullableFilter<"ContentItem"> | string | null
   body?: Prisma.StringNullableFilter<"ContentItem"> | string | null
   url?: Prisma.StringNullableFilter<"ContentItem"> | string | null
   order?: Prisma.IntFilter<"ContentItem"> | number
+  assignmentId?: Prisma.UuidNullableFilter<"ContentItem"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ContentItem"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ContentItem"> | Date | string
   module?: Prisma.XOR<Prisma.ModuleScalarRelationFilter, Prisma.ModuleWhereInput>
+  assignment?: Prisma.XOR<Prisma.AssignmentNullableScalarRelationFilter, Prisma.AssignmentWhereInput> | null
 }, "id" | "moduleId_order">
 
 export type ContentItemOrderByWithAggregationInput = {
@@ -286,9 +309,11 @@ export type ContentItemOrderByWithAggregationInput = {
   moduleId?: Prisma.SortOrder
   type?: Prisma.SortOrder
   title?: Prisma.SortOrder
+  description?: Prisma.SortOrderInput | Prisma.SortOrder
   body?: Prisma.SortOrderInput | Prisma.SortOrder
   url?: Prisma.SortOrderInput | Prisma.SortOrder
   order?: Prisma.SortOrder
+  assignmentId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ContentItemCountOrderByAggregateInput
@@ -306,9 +331,11 @@ export type ContentItemScalarWhereWithAggregatesInput = {
   moduleId?: Prisma.UuidWithAggregatesFilter<"ContentItem"> | string
   type?: Prisma.EnumContentTypeWithAggregatesFilter<"ContentItem"> | $Enums.ContentType
   title?: Prisma.StringWithAggregatesFilter<"ContentItem"> | string
+  description?: Prisma.StringNullableWithAggregatesFilter<"ContentItem"> | string | null
   body?: Prisma.StringNullableWithAggregatesFilter<"ContentItem"> | string | null
   url?: Prisma.StringNullableWithAggregatesFilter<"ContentItem"> | string | null
   order?: Prisma.IntWithAggregatesFilter<"ContentItem"> | number
+  assignmentId?: Prisma.UuidNullableWithAggregatesFilter<"ContentItem"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ContentItem"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"ContentItem"> | Date | string
 }
@@ -317,12 +344,14 @@ export type ContentItemCreateInput = {
   id?: string
   type: $Enums.ContentType
   title: string
+  description?: string | null
   body?: string | null
   url?: string | null
   order: number
   createdAt?: Date | string
   updatedAt?: Date | string
   module: Prisma.ModuleCreateNestedOneWithoutContentItemsInput
+  assignment?: Prisma.AssignmentCreateNestedOneWithoutContentItemsInput
 }
 
 export type ContentItemUncheckedCreateInput = {
@@ -330,9 +359,11 @@ export type ContentItemUncheckedCreateInput = {
   moduleId: string
   type: $Enums.ContentType
   title: string
+  description?: string | null
   body?: string | null
   url?: string | null
   order: number
+  assignmentId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -341,12 +372,14 @@ export type ContentItemUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumContentTypeFieldUpdateOperationsInput | $Enums.ContentType
   title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   body?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   order?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   module?: Prisma.ModuleUpdateOneRequiredWithoutContentItemsNestedInput
+  assignment?: Prisma.AssignmentUpdateOneWithoutContentItemsNestedInput
 }
 
 export type ContentItemUncheckedUpdateInput = {
@@ -354,9 +387,11 @@ export type ContentItemUncheckedUpdateInput = {
   moduleId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumContentTypeFieldUpdateOperationsInput | $Enums.ContentType
   title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   body?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   order?: Prisma.IntFieldUpdateOperationsInput | number
+  assignmentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -366,9 +401,11 @@ export type ContentItemCreateManyInput = {
   moduleId: string
   type: $Enums.ContentType
   title: string
+  description?: string | null
   body?: string | null
   url?: string | null
   order: number
+  assignmentId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -377,6 +414,7 @@ export type ContentItemUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumContentTypeFieldUpdateOperationsInput | $Enums.ContentType
   title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   body?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   order?: Prisma.IntFieldUpdateOperationsInput | number
@@ -389,11 +427,23 @@ export type ContentItemUncheckedUpdateManyInput = {
   moduleId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumContentTypeFieldUpdateOperationsInput | $Enums.ContentType
   title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   body?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   order?: Prisma.IntFieldUpdateOperationsInput | number
+  assignmentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ContentItemListRelationFilter = {
+  every?: Prisma.ContentItemWhereInput
+  some?: Prisma.ContentItemWhereInput
+  none?: Prisma.ContentItemWhereInput
+}
+
+export type ContentItemOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type ContentItemModuleIdOrderCompoundUniqueInput = {
@@ -406,9 +456,11 @@ export type ContentItemCountOrderByAggregateInput = {
   moduleId?: Prisma.SortOrder
   type?: Prisma.SortOrder
   title?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   body?: Prisma.SortOrder
   url?: Prisma.SortOrder
   order?: Prisma.SortOrder
+  assignmentId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -422,9 +474,11 @@ export type ContentItemMaxOrderByAggregateInput = {
   moduleId?: Prisma.SortOrder
   type?: Prisma.SortOrder
   title?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   body?: Prisma.SortOrder
   url?: Prisma.SortOrder
   order?: Prisma.SortOrder
+  assignmentId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -434,9 +488,11 @@ export type ContentItemMinOrderByAggregateInput = {
   moduleId?: Prisma.SortOrder
   type?: Prisma.SortOrder
   title?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   body?: Prisma.SortOrder
   url?: Prisma.SortOrder
   order?: Prisma.SortOrder
+  assignmentId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -445,14 +501,46 @@ export type ContentItemSumOrderByAggregateInput = {
   order?: Prisma.SortOrder
 }
 
-export type ContentItemListRelationFilter = {
-  every?: Prisma.ContentItemWhereInput
-  some?: Prisma.ContentItemWhereInput
-  none?: Prisma.ContentItemWhereInput
+export type ContentItemCreateNestedManyWithoutAssignmentInput = {
+  create?: Prisma.XOR<Prisma.ContentItemCreateWithoutAssignmentInput, Prisma.ContentItemUncheckedCreateWithoutAssignmentInput> | Prisma.ContentItemCreateWithoutAssignmentInput[] | Prisma.ContentItemUncheckedCreateWithoutAssignmentInput[]
+  connectOrCreate?: Prisma.ContentItemCreateOrConnectWithoutAssignmentInput | Prisma.ContentItemCreateOrConnectWithoutAssignmentInput[]
+  createMany?: Prisma.ContentItemCreateManyAssignmentInputEnvelope
+  connect?: Prisma.ContentItemWhereUniqueInput | Prisma.ContentItemWhereUniqueInput[]
 }
 
-export type ContentItemOrderByRelationAggregateInput = {
-  _count?: Prisma.SortOrder
+export type ContentItemUncheckedCreateNestedManyWithoutAssignmentInput = {
+  create?: Prisma.XOR<Prisma.ContentItemCreateWithoutAssignmentInput, Prisma.ContentItemUncheckedCreateWithoutAssignmentInput> | Prisma.ContentItemCreateWithoutAssignmentInput[] | Prisma.ContentItemUncheckedCreateWithoutAssignmentInput[]
+  connectOrCreate?: Prisma.ContentItemCreateOrConnectWithoutAssignmentInput | Prisma.ContentItemCreateOrConnectWithoutAssignmentInput[]
+  createMany?: Prisma.ContentItemCreateManyAssignmentInputEnvelope
+  connect?: Prisma.ContentItemWhereUniqueInput | Prisma.ContentItemWhereUniqueInput[]
+}
+
+export type ContentItemUpdateManyWithoutAssignmentNestedInput = {
+  create?: Prisma.XOR<Prisma.ContentItemCreateWithoutAssignmentInput, Prisma.ContentItemUncheckedCreateWithoutAssignmentInput> | Prisma.ContentItemCreateWithoutAssignmentInput[] | Prisma.ContentItemUncheckedCreateWithoutAssignmentInput[]
+  connectOrCreate?: Prisma.ContentItemCreateOrConnectWithoutAssignmentInput | Prisma.ContentItemCreateOrConnectWithoutAssignmentInput[]
+  upsert?: Prisma.ContentItemUpsertWithWhereUniqueWithoutAssignmentInput | Prisma.ContentItemUpsertWithWhereUniqueWithoutAssignmentInput[]
+  createMany?: Prisma.ContentItemCreateManyAssignmentInputEnvelope
+  set?: Prisma.ContentItemWhereUniqueInput | Prisma.ContentItemWhereUniqueInput[]
+  disconnect?: Prisma.ContentItemWhereUniqueInput | Prisma.ContentItemWhereUniqueInput[]
+  delete?: Prisma.ContentItemWhereUniqueInput | Prisma.ContentItemWhereUniqueInput[]
+  connect?: Prisma.ContentItemWhereUniqueInput | Prisma.ContentItemWhereUniqueInput[]
+  update?: Prisma.ContentItemUpdateWithWhereUniqueWithoutAssignmentInput | Prisma.ContentItemUpdateWithWhereUniqueWithoutAssignmentInput[]
+  updateMany?: Prisma.ContentItemUpdateManyWithWhereWithoutAssignmentInput | Prisma.ContentItemUpdateManyWithWhereWithoutAssignmentInput[]
+  deleteMany?: Prisma.ContentItemScalarWhereInput | Prisma.ContentItemScalarWhereInput[]
+}
+
+export type ContentItemUncheckedUpdateManyWithoutAssignmentNestedInput = {
+  create?: Prisma.XOR<Prisma.ContentItemCreateWithoutAssignmentInput, Prisma.ContentItemUncheckedCreateWithoutAssignmentInput> | Prisma.ContentItemCreateWithoutAssignmentInput[] | Prisma.ContentItemUncheckedCreateWithoutAssignmentInput[]
+  connectOrCreate?: Prisma.ContentItemCreateOrConnectWithoutAssignmentInput | Prisma.ContentItemCreateOrConnectWithoutAssignmentInput[]
+  upsert?: Prisma.ContentItemUpsertWithWhereUniqueWithoutAssignmentInput | Prisma.ContentItemUpsertWithWhereUniqueWithoutAssignmentInput[]
+  createMany?: Prisma.ContentItemCreateManyAssignmentInputEnvelope
+  set?: Prisma.ContentItemWhereUniqueInput | Prisma.ContentItemWhereUniqueInput[]
+  disconnect?: Prisma.ContentItemWhereUniqueInput | Prisma.ContentItemWhereUniqueInput[]
+  delete?: Prisma.ContentItemWhereUniqueInput | Prisma.ContentItemWhereUniqueInput[]
+  connect?: Prisma.ContentItemWhereUniqueInput | Prisma.ContentItemWhereUniqueInput[]
+  update?: Prisma.ContentItemUpdateWithWhereUniqueWithoutAssignmentInput | Prisma.ContentItemUpdateWithWhereUniqueWithoutAssignmentInput[]
+  updateMany?: Prisma.ContentItemUpdateManyWithWhereWithoutAssignmentInput | Prisma.ContentItemUpdateManyWithWhereWithoutAssignmentInput[]
+  deleteMany?: Prisma.ContentItemScalarWhereInput | Prisma.ContentItemScalarWhereInput[]
 }
 
 export type EnumContentTypeFieldUpdateOperationsInput = {
@@ -513,10 +601,25 @@ export type ContentItemUncheckedUpdateManyWithoutModuleNestedInput = {
   deleteMany?: Prisma.ContentItemScalarWhereInput | Prisma.ContentItemScalarWhereInput[]
 }
 
-export type ContentItemCreateWithoutModuleInput = {
+export type ContentItemCreateWithoutAssignmentInput = {
   id?: string
   type: $Enums.ContentType
   title: string
+  description?: string | null
+  body?: string | null
+  url?: string | null
+  order: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  module: Prisma.ModuleCreateNestedOneWithoutContentItemsInput
+}
+
+export type ContentItemUncheckedCreateWithoutAssignmentInput = {
+  id?: string
+  moduleId: string
+  type: $Enums.ContentType
+  title: string
+  description?: string | null
   body?: string | null
   url?: string | null
   order: number
@@ -524,13 +627,71 @@ export type ContentItemCreateWithoutModuleInput = {
   updatedAt?: Date | string
 }
 
+export type ContentItemCreateOrConnectWithoutAssignmentInput = {
+  where: Prisma.ContentItemWhereUniqueInput
+  create: Prisma.XOR<Prisma.ContentItemCreateWithoutAssignmentInput, Prisma.ContentItemUncheckedCreateWithoutAssignmentInput>
+}
+
+export type ContentItemCreateManyAssignmentInputEnvelope = {
+  data: Prisma.ContentItemCreateManyAssignmentInput | Prisma.ContentItemCreateManyAssignmentInput[]
+  skipDuplicates?: boolean
+}
+
+export type ContentItemUpsertWithWhereUniqueWithoutAssignmentInput = {
+  where: Prisma.ContentItemWhereUniqueInput
+  update: Prisma.XOR<Prisma.ContentItemUpdateWithoutAssignmentInput, Prisma.ContentItemUncheckedUpdateWithoutAssignmentInput>
+  create: Prisma.XOR<Prisma.ContentItemCreateWithoutAssignmentInput, Prisma.ContentItemUncheckedCreateWithoutAssignmentInput>
+}
+
+export type ContentItemUpdateWithWhereUniqueWithoutAssignmentInput = {
+  where: Prisma.ContentItemWhereUniqueInput
+  data: Prisma.XOR<Prisma.ContentItemUpdateWithoutAssignmentInput, Prisma.ContentItemUncheckedUpdateWithoutAssignmentInput>
+}
+
+export type ContentItemUpdateManyWithWhereWithoutAssignmentInput = {
+  where: Prisma.ContentItemScalarWhereInput
+  data: Prisma.XOR<Prisma.ContentItemUpdateManyMutationInput, Prisma.ContentItemUncheckedUpdateManyWithoutAssignmentInput>
+}
+
+export type ContentItemScalarWhereInput = {
+  AND?: Prisma.ContentItemScalarWhereInput | Prisma.ContentItemScalarWhereInput[]
+  OR?: Prisma.ContentItemScalarWhereInput[]
+  NOT?: Prisma.ContentItemScalarWhereInput | Prisma.ContentItemScalarWhereInput[]
+  id?: Prisma.UuidFilter<"ContentItem"> | string
+  moduleId?: Prisma.UuidFilter<"ContentItem"> | string
+  type?: Prisma.EnumContentTypeFilter<"ContentItem"> | $Enums.ContentType
+  title?: Prisma.StringFilter<"ContentItem"> | string
+  description?: Prisma.StringNullableFilter<"ContentItem"> | string | null
+  body?: Prisma.StringNullableFilter<"ContentItem"> | string | null
+  url?: Prisma.StringNullableFilter<"ContentItem"> | string | null
+  order?: Prisma.IntFilter<"ContentItem"> | number
+  assignmentId?: Prisma.UuidNullableFilter<"ContentItem"> | string | null
+  createdAt?: Prisma.DateTimeFilter<"ContentItem"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"ContentItem"> | Date | string
+}
+
+export type ContentItemCreateWithoutModuleInput = {
+  id?: string
+  type: $Enums.ContentType
+  title: string
+  description?: string | null
+  body?: string | null
+  url?: string | null
+  order: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  assignment?: Prisma.AssignmentCreateNestedOneWithoutContentItemsInput
+}
+
 export type ContentItemUncheckedCreateWithoutModuleInput = {
   id?: string
   type: $Enums.ContentType
   title: string
+  description?: string | null
   body?: string | null
   url?: string | null
   order: number
+  assignmentId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -561,28 +722,67 @@ export type ContentItemUpdateManyWithWhereWithoutModuleInput = {
   data: Prisma.XOR<Prisma.ContentItemUpdateManyMutationInput, Prisma.ContentItemUncheckedUpdateManyWithoutModuleInput>
 }
 
-export type ContentItemScalarWhereInput = {
-  AND?: Prisma.ContentItemScalarWhereInput | Prisma.ContentItemScalarWhereInput[]
-  OR?: Prisma.ContentItemScalarWhereInput[]
-  NOT?: Prisma.ContentItemScalarWhereInput | Prisma.ContentItemScalarWhereInput[]
-  id?: Prisma.UuidFilter<"ContentItem"> | string
-  moduleId?: Prisma.UuidFilter<"ContentItem"> | string
-  type?: Prisma.EnumContentTypeFilter<"ContentItem"> | $Enums.ContentType
-  title?: Prisma.StringFilter<"ContentItem"> | string
-  body?: Prisma.StringNullableFilter<"ContentItem"> | string | null
-  url?: Prisma.StringNullableFilter<"ContentItem"> | string | null
-  order?: Prisma.IntFilter<"ContentItem"> | number
-  createdAt?: Prisma.DateTimeFilter<"ContentItem"> | Date | string
-  updatedAt?: Prisma.DateTimeFilter<"ContentItem"> | Date | string
+export type ContentItemCreateManyAssignmentInput = {
+  id?: string
+  moduleId: string
+  type: $Enums.ContentType
+  title: string
+  description?: string | null
+  body?: string | null
+  url?: string | null
+  order: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type ContentItemUpdateWithoutAssignmentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumContentTypeFieldUpdateOperationsInput | $Enums.ContentType
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  body?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  order?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  module?: Prisma.ModuleUpdateOneRequiredWithoutContentItemsNestedInput
+}
+
+export type ContentItemUncheckedUpdateWithoutAssignmentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  moduleId?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumContentTypeFieldUpdateOperationsInput | $Enums.ContentType
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  body?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  order?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ContentItemUncheckedUpdateManyWithoutAssignmentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  moduleId?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumContentTypeFieldUpdateOperationsInput | $Enums.ContentType
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  body?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  order?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ContentItemCreateManyModuleInput = {
   id?: string
   type: $Enums.ContentType
   title: string
+  description?: string | null
   body?: string | null
   url?: string | null
   order: number
+  assignmentId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -591,20 +791,24 @@ export type ContentItemUpdateWithoutModuleInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumContentTypeFieldUpdateOperationsInput | $Enums.ContentType
   title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   body?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   order?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assignment?: Prisma.AssignmentUpdateOneWithoutContentItemsNestedInput
 }
 
 export type ContentItemUncheckedUpdateWithoutModuleInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumContentTypeFieldUpdateOperationsInput | $Enums.ContentType
   title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   body?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   order?: Prisma.IntFieldUpdateOperationsInput | number
+  assignmentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -613,9 +817,11 @@ export type ContentItemUncheckedUpdateManyWithoutModuleInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumContentTypeFieldUpdateOperationsInput | $Enums.ContentType
   title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   body?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   order?: Prisma.IntFieldUpdateOperationsInput | number
+  assignmentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -627,12 +833,15 @@ export type ContentItemSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   moduleId?: boolean
   type?: boolean
   title?: boolean
+  description?: boolean
   body?: boolean
   url?: boolean
   order?: boolean
+  assignmentId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   module?: boolean | Prisma.ModuleDefaultArgs<ExtArgs>
+  assignment?: boolean | Prisma.ContentItem$assignmentArgs<ExtArgs>
 }, ExtArgs["result"]["contentItem"]>
 
 export type ContentItemSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -640,12 +849,15 @@ export type ContentItemSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   moduleId?: boolean
   type?: boolean
   title?: boolean
+  description?: boolean
   body?: boolean
   url?: boolean
   order?: boolean
+  assignmentId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   module?: boolean | Prisma.ModuleDefaultArgs<ExtArgs>
+  assignment?: boolean | Prisma.ContentItem$assignmentArgs<ExtArgs>
 }, ExtArgs["result"]["contentItem"]>
 
 export type ContentItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -653,12 +865,15 @@ export type ContentItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   moduleId?: boolean
   type?: boolean
   title?: boolean
+  description?: boolean
   body?: boolean
   url?: boolean
   order?: boolean
+  assignmentId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   module?: boolean | Prisma.ModuleDefaultArgs<ExtArgs>
+  assignment?: boolean | Prisma.ContentItem$assignmentArgs<ExtArgs>
 }, ExtArgs["result"]["contentItem"]>
 
 export type ContentItemSelectScalar = {
@@ -666,37 +881,45 @@ export type ContentItemSelectScalar = {
   moduleId?: boolean
   type?: boolean
   title?: boolean
+  description?: boolean
   body?: boolean
   url?: boolean
   order?: boolean
+  assignmentId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ContentItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "moduleId" | "type" | "title" | "body" | "url" | "order" | "createdAt" | "updatedAt", ExtArgs["result"]["contentItem"]>
+export type ContentItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "moduleId" | "type" | "title" | "description" | "body" | "url" | "order" | "assignmentId" | "createdAt" | "updatedAt", ExtArgs["result"]["contentItem"]>
 export type ContentItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   module?: boolean | Prisma.ModuleDefaultArgs<ExtArgs>
+  assignment?: boolean | Prisma.ContentItem$assignmentArgs<ExtArgs>
 }
 export type ContentItemIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   module?: boolean | Prisma.ModuleDefaultArgs<ExtArgs>
+  assignment?: boolean | Prisma.ContentItem$assignmentArgs<ExtArgs>
 }
 export type ContentItemIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   module?: boolean | Prisma.ModuleDefaultArgs<ExtArgs>
+  assignment?: boolean | Prisma.ContentItem$assignmentArgs<ExtArgs>
 }
 
 export type $ContentItemPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ContentItem"
   objects: {
     module: Prisma.$ModulePayload<ExtArgs>
+    assignment: Prisma.$AssignmentPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     moduleId: string
     type: $Enums.ContentType
     title: string
+    description: string | null
     body: string | null
     url: string | null
     order: number
+    assignmentId: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["contentItem"]>
@@ -1094,6 +1317,7 @@ readonly fields: ContentItemFieldRefs;
 export interface Prisma__ContentItemClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   module<T extends Prisma.ModuleDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ModuleDefaultArgs<ExtArgs>>): Prisma.Prisma__ModuleClient<runtime.Types.Result.GetResult<Prisma.$ModulePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  assignment<T extends Prisma.ContentItem$assignmentArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ContentItem$assignmentArgs<ExtArgs>>): Prisma.Prisma__AssignmentClient<runtime.Types.Result.GetResult<Prisma.$AssignmentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1127,9 +1351,11 @@ export interface ContentItemFieldRefs {
   readonly moduleId: Prisma.FieldRef<"ContentItem", 'String'>
   readonly type: Prisma.FieldRef<"ContentItem", 'ContentType'>
   readonly title: Prisma.FieldRef<"ContentItem", 'String'>
+  readonly description: Prisma.FieldRef<"ContentItem", 'String'>
   readonly body: Prisma.FieldRef<"ContentItem", 'String'>
   readonly url: Prisma.FieldRef<"ContentItem", 'String'>
   readonly order: Prisma.FieldRef<"ContentItem", 'Int'>
+  readonly assignmentId: Prisma.FieldRef<"ContentItem", 'String'>
   readonly createdAt: Prisma.FieldRef<"ContentItem", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"ContentItem", 'DateTime'>
 }
@@ -1530,6 +1756,25 @@ export type ContentItemDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.I
    * Limit how many ContentItems to delete.
    */
   limit?: number
+}
+
+/**
+ * ContentItem.assignment
+ */
+export type ContentItem$assignmentArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Assignment
+   */
+  select?: Prisma.AssignmentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Assignment
+   */
+  omit?: Prisma.AssignmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssignmentInclude<ExtArgs> | null
+  where?: Prisma.AssignmentWhereInput
 }
 
 /**

@@ -19,8 +19,10 @@ export type SubmissionPolicy = (typeof SubmissionPolicy)[keyof typeof Submission
 
 export const ContentType = {
   VIDEO: 'VIDEO',
+  YOUTUBE_VIDEO: 'YOUTUBE_VIDEO',
   TEXT: 'TEXT',
-  LINK: 'LINK'
+  LINK: 'LINK',
+  ASSIGNMENT: 'ASSIGNMENT'
 } as const
 
 export type ContentType = (typeof ContentType)[keyof typeof ContentType]

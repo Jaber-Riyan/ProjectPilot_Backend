@@ -97,9 +97,11 @@ export const ContentItemScalarFieldEnum = {
   moduleId: 'moduleId',
   type: 'type',
   title: 'title',
+  description: 'description',
   body: 'body',
   url: 'url',
   order: 'order',
+  assignmentId: 'assignmentId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -112,6 +114,7 @@ export const CourseScalarFieldEnum = {
   title: 'title',
   slug: 'slug',
   description: 'description',
+  imageUrl: 'imageUrl',
   isPublished: 'isPublished',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
