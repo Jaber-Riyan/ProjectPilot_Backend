@@ -12,6 +12,9 @@ import { AppError } from './errors/app-error';
 export function createApp(): Express {
   const app: Express = express();
 
+  // Configure reverse proxy trust for accurate client IP resolution (e.g. Vercel)
+  app.set('trust proxy', 1);
+
   // 1. Security Headers
   app.use(helmet());
 

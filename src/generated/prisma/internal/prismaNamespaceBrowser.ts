@@ -56,6 +56,7 @@ export const ModelName = {
   Course: 'Course',
   Feedback: 'Feedback',
   Module: 'Module',
+  RateLimitEntry: 'RateLimitEntry',
   Submission: 'Submission',
   User: 'User'
 } as const
@@ -143,6 +144,19 @@ export const ModuleScalarFieldEnum = {
 } as const
 
 export type ModuleScalarFieldEnum = (typeof ModuleScalarFieldEnum)[keyof typeof ModuleScalarFieldEnum]
+
+
+export const RateLimitEntryScalarFieldEnum = {
+  id: 'id',
+  key: 'key',
+  count: 'count',
+  windowStartedAt: 'windowStartedAt',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RateLimitEntryScalarFieldEnum = (typeof RateLimitEntryScalarFieldEnum)[keyof typeof RateLimitEntryScalarFieldEnum]
 
 
 export const SubmissionScalarFieldEnum = {

@@ -21,6 +21,12 @@ export interface AppConfig {
     bodyLimit: string;
     jsonLimit: string;
   };
+  rateLimit: {
+    enabled: boolean;
+    defaultWindowMs: number;
+    defaultMaxRequests: number;
+    cleanupBatchSize: number;
+  };
 }
 
 export const appConfig: AppConfig = {
@@ -43,5 +49,11 @@ export const appConfig: AppConfig = {
   security: {
     bodyLimit: '10mb',
     jsonLimit: '10mb',
+  },
+  rateLimit: {
+    enabled: env.RATE_LIMIT_ENABLED,
+    defaultWindowMs: env.RATE_LIMIT_WINDOW_MS,
+    defaultMaxRequests: env.RATE_LIMIT_MAX_REQUESTS,
+    cleanupBatchSize: env.RATE_LIMIT_CLEANUP_BATCH_SIZE,
   },
 };

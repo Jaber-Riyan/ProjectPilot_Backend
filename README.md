@@ -1,6 +1,6 @@
-# ProjectPilot LMS — Backend Architecture
+# ProjectPilot LMS — Backend Architecture & Database-Backed Rate Limiting
 
-Production-ready Express.js + TypeScript REST API foundation, Prisma ORM v7 with Neon PostgreSQL, and modular repository-based architecture for the ProjectPilot Learning Management System.
+Production-ready Express.js + TypeScript REST API foundation, Prisma ORM v7 with Neon PostgreSQL, modular repository-based architecture, and database-backed atomic rate limiting for the ProjectPilot Learning Management System.
 
 ---
 
@@ -22,10 +22,18 @@ ProjectPilot LMS is a platform designed for students and mentors to manage cours
 - **Phase 3: Modular, Repository-Based Architecture & Multi-File Schemas**
   - Multi-file Prisma schemas organized cleanly under `prisma/models/` (`user.prisma`, `course.prisma`, `module.prisma`, etc.).
   - Centralized application settings (`src/config/app-config.ts`).
-  - Strict unidirectional dependency flow: `Route → Controller → Service → Repository → Database`.
+  - Strict unidirectional dependency flow: `Route → Middleware → Controller → Service → Repository → Database`.
   - Type-safe generic `BaseRepository` for common CRUD operations.
   - Re-exported domain entity types from generated Prisma clients (`src/models/index.ts`).
   - Turnkey Vercel serverless deployment (`api/index.ts` & `vercel.json`).
+- **Phase 4: Database-Backed Atomic Rate Limiting**
+  - Persistent rate limiting via `RateLimitEntry` stored in PostgreSQL.
+  - Concurrency-safe atomic fixed-window algorithm using PostgreSQL `INSERT ... ON CONFLICT DO UPDATE` with row-level locking.
+  - Standard headers emitted: `RateLimit-Limit`, `RateLimit-Remaining`, `RateLimit-Reset`, and `Retry-After`.
+  - Privacy-preserving SHA-256 hashed keys (no raw IPs stored in the database).
+  - Configurable fail-closed / fail-open failure policies.
+  - Expiry cleanup strategy with bounded batch deletions (`npm run db:cleanup-rate-limits`).
+  - Liveness probe (`/api/v1/health`) completely exempt from rate limiting.
 
 ---
 
@@ -34,248 +42,223 @@ ProjectPilot LMS is a platform designed for students and mentors to manage cours
 ```text
 backend/
 ├── api/
-│   └── index.ts                       # Vercel serverless function entry point
+│   └── index.ts                         # Vercel serverless function entry point
 ├── prisma/
-│   ├── schema.prisma                  # Prisma root entry point (generator & datasource)
-│   ├── models/                        # Multi-file Prisma schemas
-│   │   ├── user.prisma                # User model & Role enum
-│   │   ├── course.prisma              # Course model
-│   │   ├── module.prisma              # Module model
-│   │   ├── content-item.prisma        # ContentItem model & ContentType enum
-│   │   ├── assignment.prisma          # Assignment model & SubmissionPolicy enum
-│   │   ├── submission.prisma          # Submission model & SubmissionStatus enum
-│   │   └── feedback.prisma            # Feedback model
-│   └── migrations/                    # SQL migrations history
+│   ├── schema.prisma                    # Root Prisma generator & datasource definition
+│   ├── models/                          # Multi-file Prisma schema models & enums
+│   │   ├── user.prisma                  # User model & Role enum
+│   │   ├── course.prisma                # Course model
+│   │   ├── module.prisma                # Module model
+│   │   ├── content-item.prisma          # ContentItem model & ContentType enum
+│   │   ├── assignment.prisma            # Assignment model & SubmissionPolicy enum
+│   │   ├── submission.prisma            # Submission model & SubmissionStatus enum
+│   │   ├── feedback.prisma              # Feedback model
+│   │   └── rate-limit.prisma            # RateLimitEntry model & indexes
+│   └── migrations/                      # SQL migration history
 │
 ├── src/
-│   ├── app.ts                         # Express app definition & middleware pipeline
-│   ├── server.ts                      # HTTP listener & graceful shutdown lifecycle
+│   ├── app.ts                           # Express application factory & middleware pipeline
+│   ├── server.ts                        # HTTP listener with graceful shutdown lifecycle
 │   ├── api/
 │   │   └── v1/
-│   │       └── index.ts               # Versioned API routes mount point (/api/v1)
+│   │       └── index.ts                 # Versioned API route mount point (/api/v1)
 │   ├── config/
-│   │   ├── env.ts                     # Zod-validated environment schema
-│   │   └── app-config.ts              # Centralized application defaults & limits
+│   │   ├── env.ts                       # Zod runtime environment validation
+│   │   └── app-config.ts                # Centralized application defaults & limits
 │   ├── db/
-│   │   └── prisma.ts                  # Shared lazy-singleton Prisma client (Neon adapter)
+│   │   └── prisma.ts                    # Shared lazy-singleton Prisma client (Neon adapter)
 │   ├── errors/
-│   │   └── app-error.ts               # AppError class & API response types
+│   │   └── app-error.ts                 # AppError domain class & JSON response envelopes
 │   ├── lib/
-│   │   ├── logger.ts                  # Structured JSON logger with sensitive data redaction
-│   │   └── async-handler.ts           # Safe async Express route wrapper
+│   │   ├── logger.ts                    # Structured JSON logger with secret redaction
+│   │   └── async-handler.ts             # Type-safe Express async route wrapper
 │   ├── middleware/
-│   │   ├── error-handler.ts           # Central error handling middleware
-│   │   ├── not-found.ts               # 404 handler for unknown routes
-│   │   └── request-context.ts         # Correlation ID (X-Request-Id) and latency logger
+│   │   ├── error-handler.ts             # Central error handling middleware
+│   │   ├── not-found.ts                 # 404 handler for unmatched routes
+│   │   └── request-context.ts           # Correlation ID (X-Request-Id) and latency logger
 │   ├── models/
-│   │   ├── index.ts                   # Domain entity type re-exports from Prisma
-│   │   └── README.md                  # Documentation on model separation
+│   │   ├── index.ts                     # Domain entity type re-exports from Prisma
+│   │   └── README.md                    # Documentation on prisma/models vs src/models
 │   ├── modules/
-│   │   ├── health/                    # Health module (liveness & readiness)
+│   │   ├── health/                      # Health module (liveness & readiness)
 │   │   │   ├── health.controller.ts
 │   │   │   ├── health.routes.ts
 │   │   │   └── health.service.ts
-│   │   └── README.md                  # Guide for adding new feature modules
+│   │   ├── rate-limit/                  # Database-backed rate limiting module
+│   │   │   ├── rate-limit.types.ts      # Policy & decision interfaces
+│   │   │   ├── rate-limit.repository.ts # Concurrency-safe atomic PostgreSQL operations
+│   │   │   ├── rate-limit.service.ts    # Hashing, policy evaluations & failure handling
+│   │   │   ├── rate-limit.middleware.ts # Configurable Express middleware factory
+│   │   │   └── index.ts
+│   │   └── README.md                    # Feature module implementation guide
 │   ├── repositories/
-│   │   ├── base.repository.ts         # Generic type-safe CRUD repository
-│   │   ├── repository.types.ts        # Repository interfaces & pagination types
-│   │   └── README.md                  # Guide for feature-specific repositories
+│   │   ├── base.repository.ts           # Generic type-safe CRUD repository
+│   │   ├── repository.types.ts          # Delegate types & pagination interfaces
+│   │   └── README.md                    # Repository pattern & transaction guide
 │   ├── routes/
-│   │   └── index.ts                   # Central route alias
+│   │   └── index.ts                     # Central route alias
 │   ├── scripts/
-│   │   └── verify-db.ts               # Harmless DB connectivity check script (SELECT 1)
+│   │   ├── verify-db.ts                 # Database connectivity check script (SELECT 1)
+│   │   └── cleanup-rate-limits.ts       # Bounded expired rate-limit cleanup CLI
 │   ├── types/
-│   │   └── express.d.ts               # Express request augmentation (req.id, startTime)
+│   │   └── express.d.ts                 # Express request augmentation (req.id, startTime)
 │   └── utils/
-│       ├── pagination.ts              # Reusable pagination calculations
-│       ├── slugify.ts                 # String to URL slug converter
+│       ├── pagination.ts                # Reusable pagination calculations
+│       ├── slugify.ts                   # String to URL slug converter
 │       └── index.ts
 │
 ├── tests/
-│   ├── app.test.ts                    # HTTP integration & lifecycle tests
-│   ├── base-repository.test.ts        # Generic repository unit tests
-│   └── utils.test.ts                  # Utility unit tests
-├── .env.example                       # Environment variables template
-├── eslint.config.mjs                  # ESLint 9 configuration
-├── package.json                       # Scripts and dependencies
-├── prisma.config.ts                   # Prisma v7 configuration file
-├── tsconfig.json                      # Strict TypeScript compiler options
-├── vercel.json                        # Vercel serverless routing
-└── vitest.config.mts                  # Vitest test configuration
+│   ├── app.test.ts                      # HTTP pipeline, health, 404 & error tests
+│   ├── base-repository.test.ts          # BaseRepository generic CRUD unit tests
+│   ├── rate-limit.test.ts               # Rate limiter unit, boundary, header & mock tests
+│   ├── rate-limit-db.test.ts            # Live PostgreSQL atomic concurrency tests
+│   └── utils.test.ts                    # Pagination & slugify unit tests
+├── .env.example                         # Environment configuration template
+├── eslint.config.mjs                    # ESLint 9 configuration
+├── package.json                         # NPM scripts & dependencies
+├── prisma.config.ts                     # Prisma v7 configuration (schema: 'prisma')
+├── tsconfig.json                        # Strict TypeScript compiler options
+├── vercel.json                          # Vercel serverless rewrite rules
+└── vitest.config.mts                    # Vitest configuration
 ```
 
 ---
 
-## 3. Dependency Flow & Architecture Rules
+## 3. Database-Backed Rate Limiting Architecture
 
+### Concurrency-Safe Atomic Algorithm
+
+To eliminate read-then-write race conditions under simultaneous traffic, the rate limiter uses a single atomic PostgreSQL statement with row-level locking:
+
+```sql
+INSERT INTO "rate_limit_entries" ("id", "key", "count", "windowStartedAt", "expiresAt", "createdAt", "updatedAt")
+VALUES ($1::uuid, $2, 1, $3, $4, $3, $3)
+ON CONFLICT ("key") DO UPDATE
+SET
+  "count" = CASE
+    WHEN "rate_limit_entries"."expiresAt" <= $3 THEN 1
+    ELSE LEAST("rate_limit_entries"."count" + 1, $5 + 1)
+  END,
+  "windowStartedAt" = CASE
+    WHEN "rate_limit_entries"."expiresAt" <= $3 THEN $3
+    ELSE "rate_limit_entries"."windowStartedAt"
+  END,
+  "expiresAt" = CASE
+    WHEN "rate_limit_entries"."expiresAt" <= $3 THEN $4
+    ELSE "rate_limit_entries"."expiresAt"
+  END,
+  "updatedAt" = $3
+RETURNING
+  "id",
+  "key",
+  "count",
+  "windowStartedAt",
+  "expiresAt";
+```
+
+#### Why Concurrent Requests Cannot Bypass the Limit:
+1. **Row-Level Locking**: PostgreSQL's `INSERT ... ON CONFLICT DO UPDATE` locks the target row during evaluation. Simultaneous requests arriving at the exact same millisecond are serialized by the database engine.
+2. **Atomic Window Expiry**: If `expiresAt <= now`, the count resets to `1` and a new window begins atomically.
+3. **Atomic Increment**: If the window is still active (`expiresAt > now`), `count` increments by 1.
+4. **Zero Overflow**: `LEAST(count + 1, maxRequests + 1)` prevents integer overflow during denial-of-service attempts.
+
+### Key Generation & Privacy Protection
+
+Rate limit keys are formed as:
 ```text
-HTTP Request
-    ↓
-Route (`<feature>.routes.ts`)
-    ↓
-Middleware (auth, validation, requestContext)
-    ↓
-Controller (`<feature>.controller.ts`)
-    ↓
-Service (`<feature>.service.ts`)
-    ↓
-Repository (`<feature>.repository.ts`)
-    ↓
-Shared Database Client (`src/db/prisma.ts`)
-    ↓
-Neon PostgreSQL
+<prefix>:<sha256(normalized_client_identifier)>
+```
+- Client identifiers (e.g. `req.ip` via `trust proxy`) are hashed with SHA-256 before database insertion.
+- **Privacy Guarantee**: Raw IP addresses and PII are never stored in PostgreSQL or logged.
+- Key prefixes isolate distinct rate limit buckets (e.g. `api-v1:...`, `auth:login:...`, `submissions:...`).
+
+### Response Headers Emitted
+
+| Header | Description | Example |
+|---|---|---|
+| `RateLimit-Limit` | Configured maximum requests for the window | `100` |
+| `RateLimit-Remaining` | Remaining requests allowed in current window | `94` |
+| `RateLimit-Reset` | Epoch timestamp (in seconds) when window resets | `1700000120` |
+| `Retry-After` *(only on 429)* | Seconds client must wait before retrying | `120` |
+
+### Blocked Response Format (`HTTP 429 Too Many Requests`)
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "TOO_MANY_REQUESTS",
+    "message": "Too many requests. Please try again after 2 minutes."
+  }
+}
 ```
 
-### Core Architecture Rules:
-1. **Routes** define endpoints and mount middlewares. They never contain business logic.
-2. **Controllers** parse HTTP input (`req.body`, `req.params`, `req.query`), delegate to services, and format standardized responses. **Controllers never execute direct Prisma queries.**
-3. **Services** execute domain validation, coordinate business logic, and orchestrate transactions. **Services never touch Express `req` or `res` objects.**
-4. **Repositories** execute database queries using Prisma. **Repositories never accept Express request objects.**
-5. **Shared Database Client** is a lazy singleton in `src/db/prisma.ts` that prevents unwanted database connections during module imports or testing.
-6. **No Circular Dependencies**: Lower layers never import from upper layers.
+### Route-Level Usage Examples
 
----
-
-## 4. Prisma Multi-File Schemas
-
-Prisma v7 natively supports multi-file schemas without custom build scripts.
-
-- **Configuration (`prisma.config.ts`)**:
-  Points the `schema` property directly to the `prisma` directory:
-  ```typescript
-  import 'dotenv/config';
-  import { defineConfig, env } from 'prisma/config';
-
-  export default defineConfig({
-    schema: 'prisma',
-    datasource: {
-      url: env('DIRECT_URL'),
-    },
-  });
-  ```
-- **Root Entry Point (`prisma/schema.prisma`)**:
-  Declares the `generator` and `datasource`:
-  ```prisma
-  generator client {
-    provider = "prisma-client"
-    output   = "../src/generated/prisma"
-  }
-
-  datasource db {
-    provider = "postgresql"
-  }
-  ```
-- **Individual Models (`prisma/models/*.prisma`)**:
-  Each domain entity lives in its own `.prisma` file. Cross-file relations resolve automatically without explicit imports.
-
-### How to Add a New Prisma Model:
-1. Create `prisma/models/<entity>.prisma`.
-2. Define the model and any relevant enums.
-3. Validate: `npm run prisma:validate`.
-4. Regenerate Client: `npm run prisma:generate`.
-
----
-
-## 5. Repositories: Base vs. Feature-Specific
-
-### Generic `BaseRepository`
-Provides type-safe, reusable CRUD operations without boilerplate:
-- `findById(id: string): Promise<T | null>`
-- `findUnique(where: TWhereUniqueInput): Promise<T | null>`
-- `findMany(options: FindManyOptions): Promise<PaginatedResult<T>>`
-- `create(data: TCreateInput): Promise<T>`
-- `update(where: TWhereUniqueInput, data: TUpdateInput): Promise<T>`
-- `delete(where: TWhereUniqueInput): Promise<T>`
-- `count(where?: TWhereInput): Promise<number>`
-- `exists(where: TWhereUniqueInput): Promise<boolean>`
-
-### Feature-Specific Repositories
-Feature repositories extend `BaseRepository` or instantiate Prisma delegates directly for domain queries:
-- Mentor dashboard review queues.
-- Student submission history and attempt numbering.
-- Complex multi-relation aggregations.
-
-### Transactions
-Coordinate multi-step operations using `prisma.$transaction`:
 ```typescript
-await prisma.$transaction(async (tx) => {
-  const submissionRepo = new SubmissionRepository(tx.submission);
-  const feedbackRepo = new FeedbackRepository(tx.feedback);
+import { createRateLimiter } from '../modules/rate-limit';
 
-  await submissionRepo.updateStatus(submissionId, 'APPROVED');
-  await feedbackRepo.createFeedback({ submissionId, mentorId, comment });
-});
+// 1. Strict Limiter for Login/Auth Endpoints (5 requests per 15 minutes)
+authRouter.post(
+  '/login',
+  createRateLimiter({
+    windowMs: 15 * 60 * 1000,
+    maxRequests: 5,
+    keyPrefix: 'auth:login',
+    customMessage: 'Too many login attempts. Please try again after 15 minutes.',
+  }),
+  loginController
+);
+
+// 2. Custom Key Generator (e.g. Rate limit by authenticated User ID instead of IP)
+submissionRouter.post(
+  '/submit',
+  createRateLimiter({
+    windowMs: 60 * 1000,
+    maxRequests: 3,
+    keyPrefix: 'assignment:submit',
+    keyGenerator: (req) => req.user?.id || req.ip,
+  }),
+  submitController
+);
 ```
 
----
+### Expiry Cleanup Strategy
 
-## 6. How to Add a New Feature Module (Example)
+In addition to lazy in-request expiry resets, expired entries are cleaned up periodically using bounded batch deletions:
+```bash
+npm run db:cleanup-rate-limits
+```
+- Uses indexed `expiresAt` column to avoid table-wide locks.
+- Bounded by `RATE_LIMIT_CLEANUP_BATCH_SIZE` (default 1000 rows).
+- Suitable for scheduled serverless triggers (e.g. Vercel Cron, AWS EventBridge, or GitHub Actions).
 
-Adding a `courses` module:
+### Database Failure Policy
 
-1. **Model**: Create `prisma/models/course.prisma` and run `npm run prisma:generate`.
-2. **Repository** (`src/modules/courses/courses.repository.ts`):
-   ```typescript
-   import { BaseRepository } from '../../repositories/base.repository';
-   import { Course, Prisma } from '../../generated/prisma/client';
-   import { prisma } from '../../db/prisma';
-
-   export class CourseRepository extends BaseRepository<
-     Course,
-     typeof prisma.course,
-     Prisma.CourseWhereUniqueInput,
-     Prisma.CourseWhereInput,
-     Prisma.CourseOrderByWithRelationInput,
-     Prisma.CourseCreateInput,
-     Prisma.CourseUpdateInput
-   > {
-     constructor() {
-       super(prisma.course);
-     }
-
-     async findBySlug(slug: string): Promise<Course | null> {
-       return this.delegate.findUnique({ where: { slug } });
-     }
-   }
-   ```
-3. **Service** (`src/modules/courses/courses.service.ts`):
-   ```typescript
-   export class CourseService {
-     constructor(private courseRepo = new CourseRepository()) {}
-
-     async getCourseBySlug(slug: string) {
-       const course = await this.courseRepo.findBySlug(slug);
-       if (!course) throw AppError.notFound('Course not found');
-       return course;
-     }
-   }
-   ```
-4. **Controller** (`src/modules/courses/courses.controller.ts`):
-   ```typescript
-   export class CourseController {
-     constructor(private courseService = new CourseService()) {}
-
-     getCourse = asyncHandler(async (req, res) => {
-       const course = await this.courseService.getCourseBySlug(req.params.slug);
-       res.status(200).json({ success: true, data: course });
-     });
-   }
-   ```
-5. **Routes** (`src/modules/courses/courses.routes.ts`):
-   ```typescript
-   const router = Router();
-   const controller = new CourseController();
-   router.get('/:slug', controller.getCourse);
-   export const courseRoutes = router;
-   ```
-6. **Mount** in `src/api/v1/index.ts`:
-   ```typescript
-   router.use('/courses', courseRoutes);
-   ```
+When the database is unreachable:
+- **`failClosed: true` (Default)**: Returns HTTP 500 `RATE_LIMIT_ERROR` to protect sensitive endpoints from abuse during database downtime. Does not leak connection strings or SQL queries.
+- **`failClosed: false`**: Permits the request to continue with fallback metrics (useful for non-critical informational endpoints).
+- **Liveness Probe**: `/api/v1/health` is mounted before the rate limiter and is 100% exempt from rate limiting.
 
 ---
 
-## 7. Development & Production Commands
+## 4. Environment Variables Reference
+
+| Variable | Type | Default | Description |
+|---|---|---|---|
+| `NODE_ENV` | `'development' \| 'test' \| 'production'` | `'development'` | Runtime environment |
+| `PORT` | `number` | `5000` | Server listening port |
+| `CORS_ORIGIN` | `string` | `http://localhost:3000` | Allowed CORS origins |
+| `DATABASE_URL` | `string` | — | Neon pooled connection string for runtime queries |
+| `DIRECT_URL` | `string` | — | Neon direct connection string for Prisma migrations |
+| `RATE_LIMIT_ENABLED` | `boolean` | `true` | Enable or disable rate limiting globally |
+| `RATE_LIMIT_WINDOW_MS` | `number` | `120000` (2 mins) | Default rate limit window in milliseconds |
+| `RATE_LIMIT_MAX_REQUESTS` | `number` | `100` | Default maximum requests allowed per window |
+| `RATE_LIMIT_CLEANUP_BATCH_SIZE` | `number` | `1000` | Maximum rows deleted in a single cleanup batch |
+
+---
+
+## 5. Development & Production Commands
 
 | Command | Action |
 |---|---|
@@ -284,30 +267,30 @@ Adding a `courses` module:
 | `npm start` | Executes compiled production server (`node dist/server.js`) |
 | `npm run typecheck` | Validates TypeScript types across the project (`tsc --noEmit`) |
 | `npm run lint` | Runs ESLint across the codebase |
-| `npm run lint:fix` | Runs ESLint and auto-fixes issues |
-| `npm test` | Runs the test suite via Vitest (`vitest run`) |
-| `npm run test:watch` | Runs tests in interactive watch mode (`vitest`) |
+| `npm test` | Runs all Vitest test suites (39 tests) |
 | `npm run prisma:generate` | Generates Prisma v7 Client into `src/generated/prisma` |
 | `npm run prisma:validate` | Validates multi-file schemas in `prisma/` against `prisma.config.ts` |
-| `npm run prisma:migrate:dev` | Creates and applies development migrations |
 | `npm run prisma:migrate:deploy` | Applies pending migrations in production / CI |
-| `npm run prisma:studio` | Opens Prisma Studio web UI |
 | `npm run db:check` | Verifies Neon database connectivity (`SELECT 1`) |
+| `npm run db:cleanup-rate-limits` | Runs bounded batch deletion of expired rate limit records |
 
 ---
 
-## 8. Health Endpoints
+## 6. Health Endpoints
 
-- **Liveness**: `GET /api/v1/health`
-  - Returns `200 OK` confirming the process is alive.
-- **Readiness**: `GET /api/v1/health/ready`
-  - Probes live database connectivity (`SELECT 1`). Returns `200 OK` if connected, or `503 Service Unavailable` if unreachable.
+- **Liveness Probe (`GET /api/v1/health`)**:
+  - Always exempt from rate limiting.
+  - Returns `200 OK` confirming the HTTP server process is responsive.
+- **Readiness Probe (`GET /api/v1/health/ready`)**:
+  - Probes live database connectivity (`SELECT 1`).
+  - Returns `200 OK` when connected, or `503 Service Unavailable` if unreachable.
 
 ---
 
-## 9. Vercel Serverless Deployment
+## 7. Vercel Serverless Deployment
 
 The project is structured for native Vercel deployment:
-- Entry point: `api/index.ts` exports the listener-free Express `app`.
-- Routing: `vercel.json` rewrites all requests to `/api/index.ts`.
-- Ready for zero-config Vercel Preview and Production deployments.
+- Entry point: [`api/index.ts`](file:///C:/Currently%20Working/PHT/Backend/api/index.ts) exports the listener-free Express `app`.
+- Routing: [`vercel.json`](file:///C:/Currently%20Working/PHT/Backend/vercel.json) rewrites all requests to `/api/index.ts`.
+- Trust proxy enabled (`app.set('trust proxy', 1)`) for accurate IP resolution behind Vercel edge routers.
+- Scheduled cleanup can be triggered via a Vercel Cron invoking a maintenance endpoint or task.

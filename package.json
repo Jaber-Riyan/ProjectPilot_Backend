@@ -17,7 +17,8 @@
     "prisma:migrate:dev": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio",
-    "db:check": "tsx src/scripts/verify-db.ts"
+    "db:check": "tsx src/scripts/verify-db.ts",
+    "db:cleanup-rate-limits": "tsx src/scripts/cleanup-rate-limits.ts"
   },
   "keywords": [
     "lms",

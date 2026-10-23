@@ -10,6 +10,7 @@ export type {
   Assignment,
   Submission,
   Feedback,
+  RateLimitEntry,
 } from '../generated/prisma/client';
 
 export {

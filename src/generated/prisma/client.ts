@@ -65,6 +65,11 @@ export type Feedback = Prisma.FeedbackModel
  */
 export type Module = Prisma.ModuleModel
 /**
+ * Model RateLimitEntry
+ * 
+ */
+export type RateLimitEntry = Prisma.RateLimitEntryModel
+/**
  * Model Submission
  * 
  */

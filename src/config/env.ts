@@ -31,6 +31,12 @@ const envSchema = z
       )
       .optional(),
     CORS_ORIGIN: z.string().default('http://localhost:3000'),
+    RATE_LIMIT_ENABLED: z
+      .preprocess((val) => (val === undefined ? true : val === 'true' || val === true), z.boolean())
+      .default(true),
+    RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(120000), // 2 minutes
+    RATE_LIMIT_MAX_REQUESTS: z.coerce.number().int().positive().default(100),
+    RATE_LIMIT_CLEANUP_BATCH_SIZE: z.coerce.number().int().positive().default(1000),
   })
   .superRefine((data, ctx) => {
     // In production, database connection is strictly required

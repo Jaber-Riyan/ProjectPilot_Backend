@@ -402,6 +402,7 @@ export const ModelName = {
   Course: 'Course',
   Feedback: 'Feedback',
   Module: 'Module',
+  RateLimitEntry: 'RateLimitEntry',
   Submission: 'Submission',
   User: 'User'
 } as const
@@ -419,7 +420,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "assignment" | "contentItem" | "course" | "feedback" | "module" | "submission" | "user"
+    modelProps: "assignment" | "contentItem" | "course" | "feedback" | "module" | "rateLimitEntry" | "submission" | "user"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -793,6 +794,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    RateLimitEntry: {
+      payload: Prisma.$RateLimitEntryPayload<ExtArgs>
+      fields: Prisma.RateLimitEntryFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.RateLimitEntryFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RateLimitEntryPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.RateLimitEntryFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RateLimitEntryPayload>
+        }
+        findFirst: {
+          args: Prisma.RateLimitEntryFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RateLimitEntryPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.RateLimitEntryFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RateLimitEntryPayload>
+        }
+        findMany: {
+          args: Prisma.RateLimitEntryFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RateLimitEntryPayload>[]
+        }
+        create: {
+          args: Prisma.RateLimitEntryCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RateLimitEntryPayload>
+        }
+        createMany: {
+          args: Prisma.RateLimitEntryCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.RateLimitEntryCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RateLimitEntryPayload>[]
+        }
+        delete: {
+          args: Prisma.RateLimitEntryDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RateLimitEntryPayload>
+        }
+        update: {
+          args: Prisma.RateLimitEntryUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RateLimitEntryPayload>
+        }
+        deleteMany: {
+          args: Prisma.RateLimitEntryDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.RateLimitEntryUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.RateLimitEntryUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RateLimitEntryPayload>[]
+        }
+        upsert: {
+          args: Prisma.RateLimitEntryUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RateLimitEntryPayload>
+        }
+        aggregate: {
+          args: Prisma.RateLimitEntryAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateRateLimitEntry>
+        }
+        groupBy: {
+          args: Prisma.RateLimitEntryGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RateLimitEntryGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.RateLimitEntryCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RateLimitEntryCountAggregateOutputType> | number
+        }
+      }
+    }
     Submission: {
       payload: Prisma.$SubmissionPayload<ExtArgs>
       fields: Prisma.SubmissionFieldRefs
@@ -1047,6 +1122,19 @@ export const ModuleScalarFieldEnum = {
 } as const
 
 export type ModuleScalarFieldEnum = (typeof ModuleScalarFieldEnum)[keyof typeof ModuleScalarFieldEnum]
+
+
+export const RateLimitEntryScalarFieldEnum = {
+  id: 'id',
+  key: 'key',
+  count: 'count',
+  windowStartedAt: 'windowStartedAt',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RateLimitEntryScalarFieldEnum = (typeof RateLimitEntryScalarFieldEnum)[keyof typeof RateLimitEntryScalarFieldEnum]
 
 
 export const SubmissionScalarFieldEnum = {
@@ -1385,6 +1473,7 @@ export type GlobalOmitConfig = {
   course?: Prisma.CourseOmit
   feedback?: Prisma.FeedbackOmit
   module?: Prisma.ModuleOmit
+  rateLimitEntry?: Prisma.RateLimitEntryOmit
   submission?: Prisma.SubmissionOmit
   user?: Prisma.UserOmit
 }
