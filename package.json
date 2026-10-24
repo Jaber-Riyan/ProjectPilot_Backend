@@ -4,10 +4,10 @@
   "description": "ProjectPilot LMS Backend API",
   "main": "dist/server.js",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
-    "build": "prisma generate && tsc",
+    "dev": "node init && tsx watch src/server.ts",
+    "build": "node init && prisma generate && tsc",
     "postinstall": "prisma generate",
-    "start": "node dist/server.js",
+    "start": "node init && node dist/server.js",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
