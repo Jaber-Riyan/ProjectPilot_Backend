@@ -30,11 +30,15 @@ export class ContentRepository {
       include: {
         module: {
           include: {
-            course: {
-              select: {
-                id: true,
-                title: true,
-                isPublished: true,
+            courseModules: {
+              include: {
+                course: {
+                  select: {
+                    id: true,
+                    title: true,
+                    isPublished: true,
+                  },
+                },
               },
             },
           },

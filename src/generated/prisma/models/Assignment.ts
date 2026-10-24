@@ -26,36 +26,36 @@ export type AggregateAssignment = {
 
 export type AssignmentMinAggregateOutputType = {
   id: string | null
-  moduleId: string | null
   title: string | null
   instructions: string | null
   submissionPolicy: $Enums.SubmissionPolicy | null
   isPublished: boolean | null
   dueAt: Date | null
+  createdById: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
 
 export type AssignmentMaxAggregateOutputType = {
   id: string | null
-  moduleId: string | null
   title: string | null
   instructions: string | null
   submissionPolicy: $Enums.SubmissionPolicy | null
   isPublished: boolean | null
   dueAt: Date | null
+  createdById: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
 
 export type AssignmentCountAggregateOutputType = {
   id: number
-  moduleId: number
   title: number
   instructions: number
   submissionPolicy: number
   isPublished: number
   dueAt: number
+  createdById: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -64,36 +64,36 @@ export type AssignmentCountAggregateOutputType = {
 
 export type AssignmentMinAggregateInputType = {
   id?: true
-  moduleId?: true
   title?: true
   instructions?: true
   submissionPolicy?: true
   isPublished?: true
   dueAt?: true
+  createdById?: true
   createdAt?: true
   updatedAt?: true
 }
 
 export type AssignmentMaxAggregateInputType = {
   id?: true
-  moduleId?: true
   title?: true
   instructions?: true
   submissionPolicy?: true
   isPublished?: true
   dueAt?: true
+  createdById?: true
   createdAt?: true
   updatedAt?: true
 }
 
 export type AssignmentCountAggregateInputType = {
   id?: true
-  moduleId?: true
   title?: true
   instructions?: true
   submissionPolicy?: true
   isPublished?: true
   dueAt?: true
+  createdById?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -173,12 +173,12 @@ export type AssignmentGroupByArgs<ExtArgs extends runtime.Types.Extensions.Inter
 
 export type AssignmentGroupByOutputType = {
   id: string
-  moduleId: string
   title: string
   instructions: string
   submissionPolicy: $Enums.SubmissionPolicy
   isPublished: boolean
   dueAt: Date | null
+  createdById: string | null
   createdAt: Date
   updatedAt: Date
   _count: AssignmentCountAggregateOutputType | null
@@ -206,30 +206,30 @@ export type AssignmentWhereInput = {
   OR?: Prisma.AssignmentWhereInput[]
   NOT?: Prisma.AssignmentWhereInput | Prisma.AssignmentWhereInput[]
   id?: Prisma.UuidFilter<"Assignment"> | string
-  moduleId?: Prisma.UuidFilter<"Assignment"> | string
   title?: Prisma.StringFilter<"Assignment"> | string
   instructions?: Prisma.StringFilter<"Assignment"> | string
   submissionPolicy?: Prisma.EnumSubmissionPolicyFilter<"Assignment"> | $Enums.SubmissionPolicy
   isPublished?: Prisma.BoolFilter<"Assignment"> | boolean
   dueAt?: Prisma.DateTimeNullableFilter<"Assignment"> | Date | string | null
+  createdById?: Prisma.UuidNullableFilter<"Assignment"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Assignment"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Assignment"> | Date | string
-  module?: Prisma.XOR<Prisma.ModuleScalarRelationFilter, Prisma.ModuleWhereInput>
+  createdBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   submissions?: Prisma.SubmissionListRelationFilter
   contentItems?: Prisma.ContentItemListRelationFilter
 }
 
 export type AssignmentOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  moduleId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   instructions?: Prisma.SortOrder
   submissionPolicy?: Prisma.SortOrder
   isPublished?: Prisma.SortOrder
   dueAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  createdById?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  module?: Prisma.ModuleOrderByWithRelationInput
+  createdBy?: Prisma.UserOrderByWithRelationInput
   submissions?: Prisma.SubmissionOrderByRelationAggregateInput
   contentItems?: Prisma.ContentItemOrderByRelationAggregateInput
 }
@@ -239,27 +239,27 @@ export type AssignmentWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.AssignmentWhereInput | Prisma.AssignmentWhereInput[]
   OR?: Prisma.AssignmentWhereInput[]
   NOT?: Prisma.AssignmentWhereInput | Prisma.AssignmentWhereInput[]
-  moduleId?: Prisma.UuidFilter<"Assignment"> | string
   title?: Prisma.StringFilter<"Assignment"> | string
   instructions?: Prisma.StringFilter<"Assignment"> | string
   submissionPolicy?: Prisma.EnumSubmissionPolicyFilter<"Assignment"> | $Enums.SubmissionPolicy
   isPublished?: Prisma.BoolFilter<"Assignment"> | boolean
   dueAt?: Prisma.DateTimeNullableFilter<"Assignment"> | Date | string | null
+  createdById?: Prisma.UuidNullableFilter<"Assignment"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Assignment"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Assignment"> | Date | string
-  module?: Prisma.XOR<Prisma.ModuleScalarRelationFilter, Prisma.ModuleWhereInput>
+  createdBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   submissions?: Prisma.SubmissionListRelationFilter
   contentItems?: Prisma.ContentItemListRelationFilter
 }, "id">
 
 export type AssignmentOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  moduleId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   instructions?: Prisma.SortOrder
   submissionPolicy?: Prisma.SortOrder
   isPublished?: Prisma.SortOrder
   dueAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  createdById?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.AssignmentCountOrderByAggregateInput
@@ -272,12 +272,12 @@ export type AssignmentScalarWhereWithAggregatesInput = {
   OR?: Prisma.AssignmentScalarWhereWithAggregatesInput[]
   NOT?: Prisma.AssignmentScalarWhereWithAggregatesInput | Prisma.AssignmentScalarWhereWithAggregatesInput[]
   id?: Prisma.UuidWithAggregatesFilter<"Assignment"> | string
-  moduleId?: Prisma.UuidWithAggregatesFilter<"Assignment"> | string
   title?: Prisma.StringWithAggregatesFilter<"Assignment"> | string
   instructions?: Prisma.StringWithAggregatesFilter<"Assignment"> | string
   submissionPolicy?: Prisma.EnumSubmissionPolicyWithAggregatesFilter<"Assignment"> | $Enums.SubmissionPolicy
   isPublished?: Prisma.BoolWithAggregatesFilter<"Assignment"> | boolean
   dueAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Assignment"> | Date | string | null
+  createdById?: Prisma.UuidNullableWithAggregatesFilter<"Assignment"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Assignment"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Assignment"> | Date | string
 }
@@ -291,19 +291,19 @@ export type AssignmentCreateInput = {
   dueAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  module: Prisma.ModuleCreateNestedOneWithoutAssignmentsInput
+  createdBy?: Prisma.UserCreateNestedOneWithoutAssignmentsCreatedInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutAssignmentInput
   contentItems?: Prisma.ContentItemCreateNestedManyWithoutAssignmentInput
 }
 
 export type AssignmentUncheckedCreateInput = {
   id?: string
-  moduleId: string
   title: string
   instructions: string
   submissionPolicy?: $Enums.SubmissionPolicy
   isPublished?: boolean
   dueAt?: Date | string | null
+  createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutAssignmentInput
@@ -319,19 +319,19 @@ export type AssignmentUpdateInput = {
   dueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  module?: Prisma.ModuleUpdateOneRequiredWithoutAssignmentsNestedInput
+  createdBy?: Prisma.UserUpdateOneWithoutAssignmentsCreatedNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutAssignmentNestedInput
   contentItems?: Prisma.ContentItemUpdateManyWithoutAssignmentNestedInput
 }
 
 export type AssignmentUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  moduleId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   instructions?: Prisma.StringFieldUpdateOperationsInput | string
   submissionPolicy?: Prisma.EnumSubmissionPolicyFieldUpdateOperationsInput | $Enums.SubmissionPolicy
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
   dueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutAssignmentNestedInput
@@ -340,12 +340,12 @@ export type AssignmentUncheckedUpdateInput = {
 
 export type AssignmentCreateManyInput = {
   id?: string
-  moduleId: string
   title: string
   instructions: string
   submissionPolicy?: $Enums.SubmissionPolicy
   isPublished?: boolean
   dueAt?: Date | string | null
+  createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -363,48 +363,48 @@ export type AssignmentUpdateManyMutationInput = {
 
 export type AssignmentUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  moduleId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   instructions?: Prisma.StringFieldUpdateOperationsInput | string
   submissionPolicy?: Prisma.EnumSubmissionPolicyFieldUpdateOperationsInput | $Enums.SubmissionPolicy
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
   dueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type AssignmentCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  moduleId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   instructions?: Prisma.SortOrder
   submissionPolicy?: Prisma.SortOrder
   isPublished?: Prisma.SortOrder
   dueAt?: Prisma.SortOrder
+  createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type AssignmentMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  moduleId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   instructions?: Prisma.SortOrder
   submissionPolicy?: Prisma.SortOrder
   isPublished?: Prisma.SortOrder
   dueAt?: Prisma.SortOrder
+  createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type AssignmentMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  moduleId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   instructions?: Prisma.SortOrder
   submissionPolicy?: Prisma.SortOrder
   isPublished?: Prisma.SortOrder
   dueAt?: Prisma.SortOrder
+  createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -412,6 +412,11 @@ export type AssignmentMinOrderByAggregateInput = {
 export type AssignmentNullableScalarRelationFilter = {
   is?: Prisma.AssignmentWhereInput | null
   isNot?: Prisma.AssignmentWhereInput | null
+}
+
+export type AssignmentScalarRelationFilter = {
+  is?: Prisma.AssignmentWhereInput
+  isNot?: Prisma.AssignmentWhereInput
 }
 
 export type AssignmentListRelationFilter = {
@@ -422,11 +427,6 @@ export type AssignmentListRelationFilter = {
 
 export type AssignmentOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type AssignmentScalarRelationFilter = {
-  is?: Prisma.AssignmentWhereInput
-  isNot?: Prisma.AssignmentWhereInput
 }
 
 export type StringFieldUpdateOperationsInput = {
@@ -449,6 +449,10 @@ export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
 }
 
+export type NullableStringFieldUpdateOperationsInput = {
+  set?: string | null
+}
+
 export type AssignmentCreateNestedOneWithoutContentItemsInput = {
   create?: Prisma.XOR<Prisma.AssignmentCreateWithoutContentItemsInput, Prisma.AssignmentUncheckedCreateWithoutContentItemsInput>
   connectOrCreate?: Prisma.AssignmentCreateOrConnectWithoutContentItemsInput
@@ -465,48 +469,6 @@ export type AssignmentUpdateOneWithoutContentItemsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.AssignmentUpdateToOneWithWhereWithoutContentItemsInput, Prisma.AssignmentUpdateWithoutContentItemsInput>, Prisma.AssignmentUncheckedUpdateWithoutContentItemsInput>
 }
 
-export type AssignmentCreateNestedManyWithoutModuleInput = {
-  create?: Prisma.XOR<Prisma.AssignmentCreateWithoutModuleInput, Prisma.AssignmentUncheckedCreateWithoutModuleInput> | Prisma.AssignmentCreateWithoutModuleInput[] | Prisma.AssignmentUncheckedCreateWithoutModuleInput[]
-  connectOrCreate?: Prisma.AssignmentCreateOrConnectWithoutModuleInput | Prisma.AssignmentCreateOrConnectWithoutModuleInput[]
-  createMany?: Prisma.AssignmentCreateManyModuleInputEnvelope
-  connect?: Prisma.AssignmentWhereUniqueInput | Prisma.AssignmentWhereUniqueInput[]
-}
-
-export type AssignmentUncheckedCreateNestedManyWithoutModuleInput = {
-  create?: Prisma.XOR<Prisma.AssignmentCreateWithoutModuleInput, Prisma.AssignmentUncheckedCreateWithoutModuleInput> | Prisma.AssignmentCreateWithoutModuleInput[] | Prisma.AssignmentUncheckedCreateWithoutModuleInput[]
-  connectOrCreate?: Prisma.AssignmentCreateOrConnectWithoutModuleInput | Prisma.AssignmentCreateOrConnectWithoutModuleInput[]
-  createMany?: Prisma.AssignmentCreateManyModuleInputEnvelope
-  connect?: Prisma.AssignmentWhereUniqueInput | Prisma.AssignmentWhereUniqueInput[]
-}
-
-export type AssignmentUpdateManyWithoutModuleNestedInput = {
-  create?: Prisma.XOR<Prisma.AssignmentCreateWithoutModuleInput, Prisma.AssignmentUncheckedCreateWithoutModuleInput> | Prisma.AssignmentCreateWithoutModuleInput[] | Prisma.AssignmentUncheckedCreateWithoutModuleInput[]
-  connectOrCreate?: Prisma.AssignmentCreateOrConnectWithoutModuleInput | Prisma.AssignmentCreateOrConnectWithoutModuleInput[]
-  upsert?: Prisma.AssignmentUpsertWithWhereUniqueWithoutModuleInput | Prisma.AssignmentUpsertWithWhereUniqueWithoutModuleInput[]
-  createMany?: Prisma.AssignmentCreateManyModuleInputEnvelope
-  set?: Prisma.AssignmentWhereUniqueInput | Prisma.AssignmentWhereUniqueInput[]
-  disconnect?: Prisma.AssignmentWhereUniqueInput | Prisma.AssignmentWhereUniqueInput[]
-  delete?: Prisma.AssignmentWhereUniqueInput | Prisma.AssignmentWhereUniqueInput[]
-  connect?: Prisma.AssignmentWhereUniqueInput | Prisma.AssignmentWhereUniqueInput[]
-  update?: Prisma.AssignmentUpdateWithWhereUniqueWithoutModuleInput | Prisma.AssignmentUpdateWithWhereUniqueWithoutModuleInput[]
-  updateMany?: Prisma.AssignmentUpdateManyWithWhereWithoutModuleInput | Prisma.AssignmentUpdateManyWithWhereWithoutModuleInput[]
-  deleteMany?: Prisma.AssignmentScalarWhereInput | Prisma.AssignmentScalarWhereInput[]
-}
-
-export type AssignmentUncheckedUpdateManyWithoutModuleNestedInput = {
-  create?: Prisma.XOR<Prisma.AssignmentCreateWithoutModuleInput, Prisma.AssignmentUncheckedCreateWithoutModuleInput> | Prisma.AssignmentCreateWithoutModuleInput[] | Prisma.AssignmentUncheckedCreateWithoutModuleInput[]
-  connectOrCreate?: Prisma.AssignmentCreateOrConnectWithoutModuleInput | Prisma.AssignmentCreateOrConnectWithoutModuleInput[]
-  upsert?: Prisma.AssignmentUpsertWithWhereUniqueWithoutModuleInput | Prisma.AssignmentUpsertWithWhereUniqueWithoutModuleInput[]
-  createMany?: Prisma.AssignmentCreateManyModuleInputEnvelope
-  set?: Prisma.AssignmentWhereUniqueInput | Prisma.AssignmentWhereUniqueInput[]
-  disconnect?: Prisma.AssignmentWhereUniqueInput | Prisma.AssignmentWhereUniqueInput[]
-  delete?: Prisma.AssignmentWhereUniqueInput | Prisma.AssignmentWhereUniqueInput[]
-  connect?: Prisma.AssignmentWhereUniqueInput | Prisma.AssignmentWhereUniqueInput[]
-  update?: Prisma.AssignmentUpdateWithWhereUniqueWithoutModuleInput | Prisma.AssignmentUpdateWithWhereUniqueWithoutModuleInput[]
-  updateMany?: Prisma.AssignmentUpdateManyWithWhereWithoutModuleInput | Prisma.AssignmentUpdateManyWithWhereWithoutModuleInput[]
-  deleteMany?: Prisma.AssignmentScalarWhereInput | Prisma.AssignmentScalarWhereInput[]
-}
-
 export type AssignmentCreateNestedOneWithoutSubmissionsInput = {
   create?: Prisma.XOR<Prisma.AssignmentCreateWithoutSubmissionsInput, Prisma.AssignmentUncheckedCreateWithoutSubmissionsInput>
   connectOrCreate?: Prisma.AssignmentCreateOrConnectWithoutSubmissionsInput
@@ -521,6 +483,48 @@ export type AssignmentUpdateOneRequiredWithoutSubmissionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.AssignmentUpdateToOneWithWhereWithoutSubmissionsInput, Prisma.AssignmentUpdateWithoutSubmissionsInput>, Prisma.AssignmentUncheckedUpdateWithoutSubmissionsInput>
 }
 
+export type AssignmentCreateNestedManyWithoutCreatedByInput = {
+  create?: Prisma.XOR<Prisma.AssignmentCreateWithoutCreatedByInput, Prisma.AssignmentUncheckedCreateWithoutCreatedByInput> | Prisma.AssignmentCreateWithoutCreatedByInput[] | Prisma.AssignmentUncheckedCreateWithoutCreatedByInput[]
+  connectOrCreate?: Prisma.AssignmentCreateOrConnectWithoutCreatedByInput | Prisma.AssignmentCreateOrConnectWithoutCreatedByInput[]
+  createMany?: Prisma.AssignmentCreateManyCreatedByInputEnvelope
+  connect?: Prisma.AssignmentWhereUniqueInput | Prisma.AssignmentWhereUniqueInput[]
+}
+
+export type AssignmentUncheckedCreateNestedManyWithoutCreatedByInput = {
+  create?: Prisma.XOR<Prisma.AssignmentCreateWithoutCreatedByInput, Prisma.AssignmentUncheckedCreateWithoutCreatedByInput> | Prisma.AssignmentCreateWithoutCreatedByInput[] | Prisma.AssignmentUncheckedCreateWithoutCreatedByInput[]
+  connectOrCreate?: Prisma.AssignmentCreateOrConnectWithoutCreatedByInput | Prisma.AssignmentCreateOrConnectWithoutCreatedByInput[]
+  createMany?: Prisma.AssignmentCreateManyCreatedByInputEnvelope
+  connect?: Prisma.AssignmentWhereUniqueInput | Prisma.AssignmentWhereUniqueInput[]
+}
+
+export type AssignmentUpdateManyWithoutCreatedByNestedInput = {
+  create?: Prisma.XOR<Prisma.AssignmentCreateWithoutCreatedByInput, Prisma.AssignmentUncheckedCreateWithoutCreatedByInput> | Prisma.AssignmentCreateWithoutCreatedByInput[] | Prisma.AssignmentUncheckedCreateWithoutCreatedByInput[]
+  connectOrCreate?: Prisma.AssignmentCreateOrConnectWithoutCreatedByInput | Prisma.AssignmentCreateOrConnectWithoutCreatedByInput[]
+  upsert?: Prisma.AssignmentUpsertWithWhereUniqueWithoutCreatedByInput | Prisma.AssignmentUpsertWithWhereUniqueWithoutCreatedByInput[]
+  createMany?: Prisma.AssignmentCreateManyCreatedByInputEnvelope
+  set?: Prisma.AssignmentWhereUniqueInput | Prisma.AssignmentWhereUniqueInput[]
+  disconnect?: Prisma.AssignmentWhereUniqueInput | Prisma.AssignmentWhereUniqueInput[]
+  delete?: Prisma.AssignmentWhereUniqueInput | Prisma.AssignmentWhereUniqueInput[]
+  connect?: Prisma.AssignmentWhereUniqueInput | Prisma.AssignmentWhereUniqueInput[]
+  update?: Prisma.AssignmentUpdateWithWhereUniqueWithoutCreatedByInput | Prisma.AssignmentUpdateWithWhereUniqueWithoutCreatedByInput[]
+  updateMany?: Prisma.AssignmentUpdateManyWithWhereWithoutCreatedByInput | Prisma.AssignmentUpdateManyWithWhereWithoutCreatedByInput[]
+  deleteMany?: Prisma.AssignmentScalarWhereInput | Prisma.AssignmentScalarWhereInput[]
+}
+
+export type AssignmentUncheckedUpdateManyWithoutCreatedByNestedInput = {
+  create?: Prisma.XOR<Prisma.AssignmentCreateWithoutCreatedByInput, Prisma.AssignmentUncheckedCreateWithoutCreatedByInput> | Prisma.AssignmentCreateWithoutCreatedByInput[] | Prisma.AssignmentUncheckedCreateWithoutCreatedByInput[]
+  connectOrCreate?: Prisma.AssignmentCreateOrConnectWithoutCreatedByInput | Prisma.AssignmentCreateOrConnectWithoutCreatedByInput[]
+  upsert?: Prisma.AssignmentUpsertWithWhereUniqueWithoutCreatedByInput | Prisma.AssignmentUpsertWithWhereUniqueWithoutCreatedByInput[]
+  createMany?: Prisma.AssignmentCreateManyCreatedByInputEnvelope
+  set?: Prisma.AssignmentWhereUniqueInput | Prisma.AssignmentWhereUniqueInput[]
+  disconnect?: Prisma.AssignmentWhereUniqueInput | Prisma.AssignmentWhereUniqueInput[]
+  delete?: Prisma.AssignmentWhereUniqueInput | Prisma.AssignmentWhereUniqueInput[]
+  connect?: Prisma.AssignmentWhereUniqueInput | Prisma.AssignmentWhereUniqueInput[]
+  update?: Prisma.AssignmentUpdateWithWhereUniqueWithoutCreatedByInput | Prisma.AssignmentUpdateWithWhereUniqueWithoutCreatedByInput[]
+  updateMany?: Prisma.AssignmentUpdateManyWithWhereWithoutCreatedByInput | Prisma.AssignmentUpdateManyWithWhereWithoutCreatedByInput[]
+  deleteMany?: Prisma.AssignmentScalarWhereInput | Prisma.AssignmentScalarWhereInput[]
+}
+
 export type AssignmentCreateWithoutContentItemsInput = {
   id?: string
   title: string
@@ -530,18 +534,18 @@ export type AssignmentCreateWithoutContentItemsInput = {
   dueAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  module: Prisma.ModuleCreateNestedOneWithoutAssignmentsInput
+  createdBy?: Prisma.UserCreateNestedOneWithoutAssignmentsCreatedInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutAssignmentInput
 }
 
 export type AssignmentUncheckedCreateWithoutContentItemsInput = {
   id?: string
-  moduleId: string
   title: string
   instructions: string
   submissionPolicy?: $Enums.SubmissionPolicy
   isPublished?: boolean
   dueAt?: Date | string | null
+  createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutAssignmentInput
@@ -572,88 +576,21 @@ export type AssignmentUpdateWithoutContentItemsInput = {
   dueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  module?: Prisma.ModuleUpdateOneRequiredWithoutAssignmentsNestedInput
+  createdBy?: Prisma.UserUpdateOneWithoutAssignmentsCreatedNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutAssignmentNestedInput
 }
 
 export type AssignmentUncheckedUpdateWithoutContentItemsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  moduleId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   instructions?: Prisma.StringFieldUpdateOperationsInput | string
   submissionPolicy?: Prisma.EnumSubmissionPolicyFieldUpdateOperationsInput | $Enums.SubmissionPolicy
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
   dueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutAssignmentNestedInput
-}
-
-export type AssignmentCreateWithoutModuleInput = {
-  id?: string
-  title: string
-  instructions: string
-  submissionPolicy?: $Enums.SubmissionPolicy
-  isPublished?: boolean
-  dueAt?: Date | string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  submissions?: Prisma.SubmissionCreateNestedManyWithoutAssignmentInput
-  contentItems?: Prisma.ContentItemCreateNestedManyWithoutAssignmentInput
-}
-
-export type AssignmentUncheckedCreateWithoutModuleInput = {
-  id?: string
-  title: string
-  instructions: string
-  submissionPolicy?: $Enums.SubmissionPolicy
-  isPublished?: boolean
-  dueAt?: Date | string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutAssignmentInput
-  contentItems?: Prisma.ContentItemUncheckedCreateNestedManyWithoutAssignmentInput
-}
-
-export type AssignmentCreateOrConnectWithoutModuleInput = {
-  where: Prisma.AssignmentWhereUniqueInput
-  create: Prisma.XOR<Prisma.AssignmentCreateWithoutModuleInput, Prisma.AssignmentUncheckedCreateWithoutModuleInput>
-}
-
-export type AssignmentCreateManyModuleInputEnvelope = {
-  data: Prisma.AssignmentCreateManyModuleInput | Prisma.AssignmentCreateManyModuleInput[]
-  skipDuplicates?: boolean
-}
-
-export type AssignmentUpsertWithWhereUniqueWithoutModuleInput = {
-  where: Prisma.AssignmentWhereUniqueInput
-  update: Prisma.XOR<Prisma.AssignmentUpdateWithoutModuleInput, Prisma.AssignmentUncheckedUpdateWithoutModuleInput>
-  create: Prisma.XOR<Prisma.AssignmentCreateWithoutModuleInput, Prisma.AssignmentUncheckedCreateWithoutModuleInput>
-}
-
-export type AssignmentUpdateWithWhereUniqueWithoutModuleInput = {
-  where: Prisma.AssignmentWhereUniqueInput
-  data: Prisma.XOR<Prisma.AssignmentUpdateWithoutModuleInput, Prisma.AssignmentUncheckedUpdateWithoutModuleInput>
-}
-
-export type AssignmentUpdateManyWithWhereWithoutModuleInput = {
-  where: Prisma.AssignmentScalarWhereInput
-  data: Prisma.XOR<Prisma.AssignmentUpdateManyMutationInput, Prisma.AssignmentUncheckedUpdateManyWithoutModuleInput>
-}
-
-export type AssignmentScalarWhereInput = {
-  AND?: Prisma.AssignmentScalarWhereInput | Prisma.AssignmentScalarWhereInput[]
-  OR?: Prisma.AssignmentScalarWhereInput[]
-  NOT?: Prisma.AssignmentScalarWhereInput | Prisma.AssignmentScalarWhereInput[]
-  id?: Prisma.UuidFilter<"Assignment"> | string
-  moduleId?: Prisma.UuidFilter<"Assignment"> | string
-  title?: Prisma.StringFilter<"Assignment"> | string
-  instructions?: Prisma.StringFilter<"Assignment"> | string
-  submissionPolicy?: Prisma.EnumSubmissionPolicyFilter<"Assignment"> | $Enums.SubmissionPolicy
-  isPublished?: Prisma.BoolFilter<"Assignment"> | boolean
-  dueAt?: Prisma.DateTimeNullableFilter<"Assignment"> | Date | string | null
-  createdAt?: Prisma.DateTimeFilter<"Assignment"> | Date | string
-  updatedAt?: Prisma.DateTimeFilter<"Assignment"> | Date | string
 }
 
 export type AssignmentCreateWithoutSubmissionsInput = {
@@ -665,18 +602,18 @@ export type AssignmentCreateWithoutSubmissionsInput = {
   dueAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  module: Prisma.ModuleCreateNestedOneWithoutAssignmentsInput
+  createdBy?: Prisma.UserCreateNestedOneWithoutAssignmentsCreatedInput
   contentItems?: Prisma.ContentItemCreateNestedManyWithoutAssignmentInput
 }
 
 export type AssignmentUncheckedCreateWithoutSubmissionsInput = {
   id?: string
-  moduleId: string
   title: string
   instructions: string
   submissionPolicy?: $Enums.SubmissionPolicy
   isPublished?: boolean
   dueAt?: Date | string | null
+  createdById?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   contentItems?: Prisma.ContentItemUncheckedCreateNestedManyWithoutAssignmentInput
@@ -707,24 +644,91 @@ export type AssignmentUpdateWithoutSubmissionsInput = {
   dueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  module?: Prisma.ModuleUpdateOneRequiredWithoutAssignmentsNestedInput
+  createdBy?: Prisma.UserUpdateOneWithoutAssignmentsCreatedNestedInput
   contentItems?: Prisma.ContentItemUpdateManyWithoutAssignmentNestedInput
 }
 
 export type AssignmentUncheckedUpdateWithoutSubmissionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  moduleId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   instructions?: Prisma.StringFieldUpdateOperationsInput | string
   submissionPolicy?: Prisma.EnumSubmissionPolicyFieldUpdateOperationsInput | $Enums.SubmissionPolicy
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
   dueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   contentItems?: Prisma.ContentItemUncheckedUpdateManyWithoutAssignmentNestedInput
 }
 
-export type AssignmentCreateManyModuleInput = {
+export type AssignmentCreateWithoutCreatedByInput = {
+  id?: string
+  title: string
+  instructions: string
+  submissionPolicy?: $Enums.SubmissionPolicy
+  isPublished?: boolean
+  dueAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutAssignmentInput
+  contentItems?: Prisma.ContentItemCreateNestedManyWithoutAssignmentInput
+}
+
+export type AssignmentUncheckedCreateWithoutCreatedByInput = {
+  id?: string
+  title: string
+  instructions: string
+  submissionPolicy?: $Enums.SubmissionPolicy
+  isPublished?: boolean
+  dueAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutAssignmentInput
+  contentItems?: Prisma.ContentItemUncheckedCreateNestedManyWithoutAssignmentInput
+}
+
+export type AssignmentCreateOrConnectWithoutCreatedByInput = {
+  where: Prisma.AssignmentWhereUniqueInput
+  create: Prisma.XOR<Prisma.AssignmentCreateWithoutCreatedByInput, Prisma.AssignmentUncheckedCreateWithoutCreatedByInput>
+}
+
+export type AssignmentCreateManyCreatedByInputEnvelope = {
+  data: Prisma.AssignmentCreateManyCreatedByInput | Prisma.AssignmentCreateManyCreatedByInput[]
+  skipDuplicates?: boolean
+}
+
+export type AssignmentUpsertWithWhereUniqueWithoutCreatedByInput = {
+  where: Prisma.AssignmentWhereUniqueInput
+  update: Prisma.XOR<Prisma.AssignmentUpdateWithoutCreatedByInput, Prisma.AssignmentUncheckedUpdateWithoutCreatedByInput>
+  create: Prisma.XOR<Prisma.AssignmentCreateWithoutCreatedByInput, Prisma.AssignmentUncheckedCreateWithoutCreatedByInput>
+}
+
+export type AssignmentUpdateWithWhereUniqueWithoutCreatedByInput = {
+  where: Prisma.AssignmentWhereUniqueInput
+  data: Prisma.XOR<Prisma.AssignmentUpdateWithoutCreatedByInput, Prisma.AssignmentUncheckedUpdateWithoutCreatedByInput>
+}
+
+export type AssignmentUpdateManyWithWhereWithoutCreatedByInput = {
+  where: Prisma.AssignmentScalarWhereInput
+  data: Prisma.XOR<Prisma.AssignmentUpdateManyMutationInput, Prisma.AssignmentUncheckedUpdateManyWithoutCreatedByInput>
+}
+
+export type AssignmentScalarWhereInput = {
+  AND?: Prisma.AssignmentScalarWhereInput | Prisma.AssignmentScalarWhereInput[]
+  OR?: Prisma.AssignmentScalarWhereInput[]
+  NOT?: Prisma.AssignmentScalarWhereInput | Prisma.AssignmentScalarWhereInput[]
+  id?: Prisma.UuidFilter<"Assignment"> | string
+  title?: Prisma.StringFilter<"Assignment"> | string
+  instructions?: Prisma.StringFilter<"Assignment"> | string
+  submissionPolicy?: Prisma.EnumSubmissionPolicyFilter<"Assignment"> | $Enums.SubmissionPolicy
+  isPublished?: Prisma.BoolFilter<"Assignment"> | boolean
+  dueAt?: Prisma.DateTimeNullableFilter<"Assignment"> | Date | string | null
+  createdById?: Prisma.UuidNullableFilter<"Assignment"> | string | null
+  createdAt?: Prisma.DateTimeFilter<"Assignment"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Assignment"> | Date | string
+}
+
+export type AssignmentCreateManyCreatedByInput = {
   id?: string
   title: string
   instructions: string
@@ -735,7 +739,7 @@ export type AssignmentCreateManyModuleInput = {
   updatedAt?: Date | string
 }
 
-export type AssignmentUpdateWithoutModuleInput = {
+export type AssignmentUpdateWithoutCreatedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   instructions?: Prisma.StringFieldUpdateOperationsInput | string
@@ -748,7 +752,7 @@ export type AssignmentUpdateWithoutModuleInput = {
   contentItems?: Prisma.ContentItemUpdateManyWithoutAssignmentNestedInput
 }
 
-export type AssignmentUncheckedUpdateWithoutModuleInput = {
+export type AssignmentUncheckedUpdateWithoutCreatedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   instructions?: Prisma.StringFieldUpdateOperationsInput | string
@@ -761,7 +765,7 @@ export type AssignmentUncheckedUpdateWithoutModuleInput = {
   contentItems?: Prisma.ContentItemUncheckedUpdateManyWithoutAssignmentNestedInput
 }
 
-export type AssignmentUncheckedUpdateManyWithoutModuleInput = {
+export type AssignmentUncheckedUpdateManyWithoutCreatedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   instructions?: Prisma.StringFieldUpdateOperationsInput | string
@@ -814,15 +818,15 @@ export type AssignmentCountOutputTypeCountContentItemsArgs<ExtArgs extends runti
 
 export type AssignmentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  moduleId?: boolean
   title?: boolean
   instructions?: boolean
   submissionPolicy?: boolean
   isPublished?: boolean
   dueAt?: boolean
+  createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  module?: boolean | Prisma.ModuleDefaultArgs<ExtArgs>
+  createdBy?: boolean | Prisma.Assignment$createdByArgs<ExtArgs>
   submissions?: boolean | Prisma.Assignment$submissionsArgs<ExtArgs>
   contentItems?: boolean | Prisma.Assignment$contentItemsArgs<ExtArgs>
   _count?: boolean | Prisma.AssignmentCountOutputTypeDefaultArgs<ExtArgs>
@@ -830,71 +834,71 @@ export type AssignmentSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
 
 export type AssignmentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  moduleId?: boolean
   title?: boolean
   instructions?: boolean
   submissionPolicy?: boolean
   isPublished?: boolean
   dueAt?: boolean
+  createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  module?: boolean | Prisma.ModuleDefaultArgs<ExtArgs>
+  createdBy?: boolean | Prisma.Assignment$createdByArgs<ExtArgs>
 }, ExtArgs["result"]["assignment"]>
 
 export type AssignmentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  moduleId?: boolean
   title?: boolean
   instructions?: boolean
   submissionPolicy?: boolean
   isPublished?: boolean
   dueAt?: boolean
+  createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  module?: boolean | Prisma.ModuleDefaultArgs<ExtArgs>
+  createdBy?: boolean | Prisma.Assignment$createdByArgs<ExtArgs>
 }, ExtArgs["result"]["assignment"]>
 
 export type AssignmentSelectScalar = {
   id?: boolean
-  moduleId?: boolean
   title?: boolean
   instructions?: boolean
   submissionPolicy?: boolean
   isPublished?: boolean
   dueAt?: boolean
+  createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type AssignmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "moduleId" | "title" | "instructions" | "submissionPolicy" | "isPublished" | "dueAt" | "createdAt" | "updatedAt", ExtArgs["result"]["assignment"]>
+export type AssignmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "instructions" | "submissionPolicy" | "isPublished" | "dueAt" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["assignment"]>
 export type AssignmentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  module?: boolean | Prisma.ModuleDefaultArgs<ExtArgs>
+  createdBy?: boolean | Prisma.Assignment$createdByArgs<ExtArgs>
   submissions?: boolean | Prisma.Assignment$submissionsArgs<ExtArgs>
   contentItems?: boolean | Prisma.Assignment$contentItemsArgs<ExtArgs>
   _count?: boolean | Prisma.AssignmentCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type AssignmentIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  module?: boolean | Prisma.ModuleDefaultArgs<ExtArgs>
+  createdBy?: boolean | Prisma.Assignment$createdByArgs<ExtArgs>
 }
 export type AssignmentIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  module?: boolean | Prisma.ModuleDefaultArgs<ExtArgs>
+  createdBy?: boolean | Prisma.Assignment$createdByArgs<ExtArgs>
 }
 
 export type $AssignmentPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Assignment"
   objects: {
-    module: Prisma.$ModulePayload<ExtArgs>
+    createdBy: Prisma.$UserPayload<ExtArgs> | null
     submissions: Prisma.$SubmissionPayload<ExtArgs>[]
     contentItems: Prisma.$ContentItemPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
-    moduleId: string
     title: string
     instructions: string
     submissionPolicy: $Enums.SubmissionPolicy
     isPublished: boolean
     dueAt: Date | null
+    createdById: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["assignment"]>
@@ -1291,7 +1295,7 @@ readonly fields: AssignmentFieldRefs;
  */
 export interface Prisma__AssignmentClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  module<T extends Prisma.ModuleDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ModuleDefaultArgs<ExtArgs>>): Prisma.Prisma__ModuleClient<runtime.Types.Result.GetResult<Prisma.$ModulePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  createdBy<T extends Prisma.Assignment$createdByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Assignment$createdByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   submissions<T extends Prisma.Assignment$submissionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Assignment$submissionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   contentItems<T extends Prisma.Assignment$contentItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Assignment$contentItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ContentItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -1324,12 +1328,12 @@ export interface Prisma__AssignmentClient<T, Null = never, ExtArgs extends runti
  */
 export interface AssignmentFieldRefs {
   readonly id: Prisma.FieldRef<"Assignment", 'String'>
-  readonly moduleId: Prisma.FieldRef<"Assignment", 'String'>
   readonly title: Prisma.FieldRef<"Assignment", 'String'>
   readonly instructions: Prisma.FieldRef<"Assignment", 'String'>
   readonly submissionPolicy: Prisma.FieldRef<"Assignment", 'SubmissionPolicy'>
   readonly isPublished: Prisma.FieldRef<"Assignment", 'Boolean'>
   readonly dueAt: Prisma.FieldRef<"Assignment", 'DateTime'>
+  readonly createdById: Prisma.FieldRef<"Assignment", 'String'>
   readonly createdAt: Prisma.FieldRef<"Assignment", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Assignment", 'DateTime'>
 }
@@ -1730,6 +1734,25 @@ export type AssignmentDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.In
    * Limit how many Assignments to delete.
    */
   limit?: number
+}
+
+/**
+ * Assignment.createdBy
+ */
+export type Assignment$createdByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
 }
 
 /**

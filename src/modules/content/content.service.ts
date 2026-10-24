@@ -71,7 +71,7 @@ export class ContentService {
     }
 
     const isMentorOrAdmin = user?.role === Role.MENTOR || user?.role === Role.ADMIN;
-    if ((!module.isPublished || !module.course.isPublished) && !isMentorOrAdmin) {
+    if (!module.isPublished && !isMentorOrAdmin) {
       throw AppError.notFound('Module not found', 'MODULE_NOT_FOUND');
     }
 
@@ -85,10 +85,7 @@ export class ContentService {
     }
 
     const isMentorOrAdmin = user?.role === Role.MENTOR || user?.role === Role.ADMIN;
-    if (
-      (!item.module.isPublished || !item.module.course.isPublished) &&
-      !isMentorOrAdmin
-    ) {
+    if (!item.module.isPublished && !isMentorOrAdmin) {
       throw AppError.notFound('Content item not found', 'CONTENT_ITEM_NOT_FOUND');
     }
 

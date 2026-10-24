@@ -1,19 +1,18 @@
 model Module {
   id          String   @id @default(uuid()) @db.Uuid
-  courseId    String   @db.Uuid
   title       String
   description String?  @db.Text
-  order       Int
   isPublished Boolean  @default(false)
+  createdById String?  @db.Uuid
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   // Relationships
-  course       Course        @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  contentItems ContentItem[]
-  assignments  Assignment[]
+  createdBy     User?          @relation("ModuleCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  courseModules CourseModule[]
+  contentItems  ContentItem[]
 
-  @@unique([courseId, order])
-  @@index([courseId])
+  @@index([isPublished])
+  @@index([createdById])
   @@map("modules")
 }

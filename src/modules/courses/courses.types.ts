@@ -26,10 +26,13 @@ export interface CourseQueryFilters {
 export interface CourseWithModuleCount extends Course {
   _count: {
     modules: number;
+    courseModules?: number;
   };
 }
 
 export interface ModuleWithContent extends Module {
+  order?: number;
+  courseModuleId?: string;
   contentItems: ContentItem[];
 }
 

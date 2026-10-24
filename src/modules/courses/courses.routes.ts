@@ -5,7 +5,7 @@ import { requireRole } from '../../middleware/authorize';
 import { validateBody, validateQuery } from '../../middleware/validate';
 import { createCourseSchema, updateCourseSchema, courseQuerySchema } from './courses.schema';
 import { courseController } from './courses.controller';
-import { createModuleSchema, reorderModulesSchema } from '../modules/modules.schema';
+import { attachOrAddModuleSchema, reorderModulesSchema } from '../modules/modules.schema';
 import { moduleController } from '../modules/modules.controller';
 
 const router = Router();
@@ -20,7 +20,7 @@ router.post(
   courseController.create
 );
 
-// 2. Nested Module Reordering (Must be mounted before generic /:courseId)
+// 2. Nested Course-Module Reordering
 router.patch(
   '/:courseId/modules/reorder',
   authenticate,
@@ -29,15 +29,21 @@ router.patch(
   moduleController.reorder
 );
 
-// 3. Nested Module Collection & Creation
+// 3. Nested Course-Module Association & Creation
 router.post(
   '/:courseId/modules',
   authenticate,
   requireRole(Role.MENTOR, Role.ADMIN),
-  validateBody(createModuleSchema),
-  moduleController.create
+  validateBody(attachOrAddModuleSchema),
+  moduleController.attachOrAdd
 );
 router.get('/:courseId/modules', optionalAuthenticate, moduleController.listByCourse);
+router.delete(
+  '/:courseId/modules/:moduleId',
+  authenticate,
+  requireRole(Role.MENTOR, Role.ADMIN),
+  moduleController.detach
+);
 
 // 4. Individual Course Retrieval & Management
 router.get('/:courseId', optionalAuthenticate, courseController.getDetail);

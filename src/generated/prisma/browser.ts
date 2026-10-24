@@ -28,6 +28,11 @@ export type Assignment = Prisma.AssignmentModel
  */
 export type ContentItem = Prisma.ContentItemModel
 /**
+ * Model CourseModule
+ * 
+ */
+export type CourseModule = Prisma.CourseModuleModel
+/**
  * Model Course
  * 
  */

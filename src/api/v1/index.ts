@@ -4,6 +4,8 @@ import { authRoutes } from '../../modules/auth/auth.routes';
 import { courseRoutes } from '../../modules/courses/courses.routes';
 import { moduleRoutes } from '../../modules/modules/modules.routes';
 import { contentRoutes } from '../../modules/content/content.routes';
+import { assignmentRoutes } from '../../modules/assignments/assignments.routes';
+import { submissionRoutes } from '../../modules/submissions/submissions.routes';
 import { createRateLimiter } from '../../modules/rate-limit';
 
 const router = Router();
@@ -25,6 +27,8 @@ router.use(
 router.use('/courses', courseRoutes);
 router.use('/modules', moduleRoutes);
 router.use('/content', contentRoutes);
+router.use('/assignments', assignmentRoutes);
+router.use('/submissions', submissionRoutes);
 
 export const v1ApiRouter = router;
 export default router;

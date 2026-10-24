@@ -35,7 +35,7 @@ export class CourseController {
   };
 
   create = async (req: Request, res: Response): Promise<void> => {
-    const result = await this.service.createCourse(req.body);
+    const result = await this.service.createCourse(req.body, req.user);
     const response: ApiResponseSuccess<Course> = {
       success: true,
       data: result,
@@ -45,7 +45,7 @@ export class CourseController {
 
   update = async (req: Request, res: Response): Promise<void> => {
     const courseId = req.params.courseId as string;
-    const result = await this.service.updateCourse(courseId, req.body);
+    const result = await this.service.updateCourse(courseId, req.body, req.user);
     const response: ApiResponseSuccess<Course> = {
       success: true,
       data: result,
@@ -55,7 +55,7 @@ export class CourseController {
 
   delete = async (req: Request, res: Response): Promise<void> => {
     const courseId = req.params.courseId as string;
-    const result = await this.service.deleteCourse(courseId);
+    const result = await this.service.deleteCourse(courseId, req.user);
     const response: ApiResponseSuccess<{ id: string; message: string }> = {
       success: true,
       data: {

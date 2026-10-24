@@ -61,7 +61,7 @@ export class CourseService {
     return course;
   }
 
-  async createCourse(input: CreateCourseInput): Promise<Course> {
+  async createCourse(input: CreateCourseInput, user?: AuthenticatedUser): Promise<Course> {
     let baseSlug = input.slug ? slugify(input.slug) : slugify(input.title);
     if (!baseSlug) {
       baseSlug = `course-${randomUUID().slice(0, 8)}`;
@@ -78,13 +78,27 @@ export class CourseService {
       description: input.description?.trim() || null,
       imageUrl: input.imageUrl?.trim() || null,
       isPublished: input.isPublished ?? false,
+      ...(user?.id ? { createdBy: { connect: { id: user.id } } } : {}),
     });
   }
 
-  async updateCourse(id: string, input: UpdateCourseInput): Promise<Course> {
+  async updateCourse(
+    id: string,
+    input: UpdateCourseInput,
+    user?: AuthenticatedUser
+  ): Promise<Course> {
     const existing = await this.repository.findById(id);
     if (!existing) {
       throw AppError.notFound('Course not found', 'COURSE_NOT_FOUND');
+    }
+
+    if (
+      existing.createdById &&
+      user &&
+      user.role === Role.MENTOR &&
+      existing.createdById !== user.id
+    ) {
+      throw AppError.forbidden('You do not have permission to modify this course', 'FORBIDDEN');
     }
 
     const data: Prisma.CourseUpdateInput = {};
@@ -112,10 +126,19 @@ export class CourseService {
     return this.repository.update(id, data);
   }
 
-  async deleteCourse(id: string): Promise<Course> {
+  async deleteCourse(id: string, user?: AuthenticatedUser): Promise<Course> {
     const existing = await this.repository.findById(id);
     if (!existing) {
       throw AppError.notFound('Course not found', 'COURSE_NOT_FOUND');
+    }
+
+    if (
+      existing.createdById &&
+      user &&
+      user.role === Role.MENTOR &&
+      existing.createdById !== user.id
+    ) {
+      throw AppError.forbidden('You do not have permission to delete this course', 'FORBIDDEN');
     }
 
     return this.repository.delete(id);

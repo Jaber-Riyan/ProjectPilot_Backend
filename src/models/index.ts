@@ -6,6 +6,7 @@ export type {
   User,
   Course,
   Module,
+  CourseModule,
   ContentItem,
   Assignment,
   Submission,

@@ -1,0 +1,18 @@
+model CourseModule {
+  id        String   @id @default(uuid()) @db.Uuid
+  courseId  String   @db.Uuid
+  moduleId  String   @db.Uuid
+  order     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  module Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  @@unique([courseId, moduleId])
+  @@unique([courseId, order])
+  @@index([courseId])
+  @@index([moduleId])
+  @@map("course_modules")
+}

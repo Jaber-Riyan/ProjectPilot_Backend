@@ -58,13 +58,21 @@ export class CourseRepository {
       take: pagination.limit,
       include: {
         _count: {
-          select: { modules: true },
+          select: { courseModules: true },
         },
       },
     });
 
+    const mappedItems: CourseWithModuleCount[] = items.map((course) => ({
+      ...course,
+      _count: {
+        modules: course._count.courseModules,
+        courseModules: course._count.courseModules,
+      },
+    }));
+
     return {
-      items: items as CourseWithModuleCount[],
+      items: mappedItems,
       total,
       page: pagination.page,
       limit: pagination.limit,
@@ -82,24 +90,43 @@ export class CourseRepository {
     const where: Prisma.CourseWhereUniqueInput = isUuid ? { id: idOrSlug } : { slug: idOrSlug };
 
     // Student/public query filters out draft modules
-    const moduleWhere: Prisma.ModuleWhereInput = isMentorOrAdmin ? {} : { isPublished: true };
+    const courseModuleWhere: Prisma.CourseModuleWhereInput = isMentorOrAdmin
+      ? {}
+      : { module: { isPublished: true } };
 
     const course = await this.client.course.findUnique({
       where,
       include: {
-        modules: {
-          where: moduleWhere,
+        courseModules: {
+          where: courseModuleWhere,
           orderBy: { order: 'asc' },
           include: {
-            contentItems: {
-              orderBy: { order: 'asc' },
+            module: {
+              include: {
+                contentItems: {
+                  orderBy: { order: 'asc' },
+                },
+              },
             },
           },
         },
       },
     });
 
-    return course as CourseDetailWithModules | null;
+    if (!course) return null;
+
+    const modules = course.courseModules.map((cm) => ({
+      ...cm.module,
+      order: cm.order,
+      courseModuleId: cm.id,
+    }));
+
+    const result = {
+      ...course,
+      modules,
+    };
+
+    return result as unknown as CourseDetailWithModules;
   }
 
   async create(data: Prisma.CourseCreateInput): Promise<Course> {

@@ -10,6 +10,7 @@
  */
 export type * from './models/Assignment'
 export type * from './models/ContentItem'
+export type * from './models/CourseModule'
 export type * from './models/Course'
 export type * from './models/Feedback'
 export type * from './models/Module'

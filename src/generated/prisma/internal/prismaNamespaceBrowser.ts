@@ -53,6 +53,7 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   Assignment: 'Assignment',
   ContentItem: 'ContentItem',
+  CourseModule: 'CourseModule',
   Course: 'Course',
   Feedback: 'Feedback',
   Module: 'Module',
@@ -79,12 +80,12 @@ export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof
 
 export const AssignmentScalarFieldEnum = {
   id: 'id',
-  moduleId: 'moduleId',
   title: 'title',
   instructions: 'instructions',
   submissionPolicy: 'submissionPolicy',
   isPublished: 'isPublished',
   dueAt: 'dueAt',
+  createdById: 'createdById',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -109,6 +110,18 @@ export const ContentItemScalarFieldEnum = {
 export type ContentItemScalarFieldEnum = (typeof ContentItemScalarFieldEnum)[keyof typeof ContentItemScalarFieldEnum]
 
 
+export const CourseModuleScalarFieldEnum = {
+  id: 'id',
+  courseId: 'courseId',
+  moduleId: 'moduleId',
+  order: 'order',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CourseModuleScalarFieldEnum = (typeof CourseModuleScalarFieldEnum)[keyof typeof CourseModuleScalarFieldEnum]
+
+
 export const CourseScalarFieldEnum = {
   id: 'id',
   title: 'title',
@@ -116,6 +129,7 @@ export const CourseScalarFieldEnum = {
   description: 'description',
   imageUrl: 'imageUrl',
   isPublished: 'isPublished',
+  createdById: 'createdById',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -137,11 +151,10 @@ export type FeedbackScalarFieldEnum = (typeof FeedbackScalarFieldEnum)[keyof typ
 
 export const ModuleScalarFieldEnum = {
   id: 'id',
-  courseId: 'courseId',
   title: 'title',
   description: 'description',
-  order: 'order',
   isPublished: 'isPublished',
+  createdById: 'createdById',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

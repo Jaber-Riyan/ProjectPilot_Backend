@@ -1,6 +1,6 @@
-# ProjectPilot LMS — Backend Architecture & Course/Module Management
+# ProjectPilot LMS — Backend Architecture & API Documentation
 
-Production-ready Express.js + TypeScript REST API foundation, Prisma ORM v7 with Neon PostgreSQL, modular repository-based architecture, database-backed atomic rate limiting, secure role-based JWT authentication, and comprehensive course, module, content management with deterministic ordering for the ProjectPilot Learning Management System.
+Production-ready Express.js + TypeScript REST API foundation, Prisma ORM v7 with Neon PostgreSQL, modular repository-based architecture, database-backed atomic rate limiting, secure role-based JWT authentication, reusable multi-course learning resources, independent assignments, and concurrency-safe student submission attempt tracking.
 
 ---
 
@@ -46,11 +46,17 @@ ProjectPilot LMS is a platform designed for students and mentors to manage cours
 - **Phase 6: Course & Module APIs, Content Management & Deterministic Ordering**
   - Course retrieval with pagination (`GET /api/v1/courses`) and detail retrieval (`GET /api/v1/courses/:courseId`).
   - Mentor/Admin course management (`POST`, `PATCH`, `DELETE`).
-  - Module management with automatic append-to-end positioning (`POST /api/v1/courses/:courseId/modules`).
-  - Safe two-phase module reordering (`PATCH /api/v1/courses/:courseId/modules/reorder`) with atomic transactions preventing unique constraint collisions on `(courseId, order)`.
   - Content item CRUD and multi-type payload validation (`VIDEO`, `YOUTUBE_VIDEO`, `TEXT`, `LINK`, `ASSIGNMENT`).
   - Two-phase content reordering (`PATCH /api/v1/modules/:moduleId/content/reorder`) preventing unique constraint collisions on `(moduleId, order)`.
   - Student publication access protection: students and unauthenticated guests are strictly prevented from viewing draft courses or unpublished modules/content.
+- **Phase 7: Assignment APIs, Submission Attempts, and Reusable LMS Resources**
+  - **Decoupled Reusable Modules**: Modules exist as independent entities (`Module`) and can be attached to multiple courses via the `CourseModule` join model with course-specific deterministic ordering (`order`).
+  - **Non-Destructive Course Detachment**: Detaching a module (`DELETE /api/v1/courses/:courseId/modules/:moduleId`) removes only the course association row; the module and its content items remain intact.
+  - **Module Deletion Protection**: Deleting a module (`DELETE /api/v1/modules/:id`) is rejected with `409 Conflict` if the module is attached to any course.
+  - **Independent Assignments**: Assignments are decoupled from specific modules and managed independently (`/api/v1/assignments`), referenced by any `ASSIGNMENT` content item.
+  - **Student Submissions & Policies**: First-class support for `ONE_TIME` (single attempt strictly enforced) and `RESUBMITTABLE` (sequential attempts) policies.
+  - **Concurrency Safety via PostgreSQL Advisory Locks**: Submission creation acquires transaction-level advisory locks (`pg_advisory_xact_lock(hashtext('sub:' || assignmentId || ':' || studentId))`), serializing concurrent attempts from the same student and preventing duplicate attempt numbers and policy bypasses.
+  - **Audit & Feedback History Preservation**: Resubmissions generate new attempt records (`attemptNumber = 2, 3...`), preserving previous attempts and their associated mentor review feedback records.
 
 ---
 
@@ -64,10 +70,11 @@ backend/
 │   ├── schema.prisma                    # Root Prisma generator & datasource definition
 │   ├── models/                          # Multi-file Prisma schema models & enums
 │   │   ├── user.prisma                  # User model & Role enum (STUDENT, MENTOR, ADMIN)
-│   │   ├── course.prisma                # Course model (with imageUrl)
-│   │   ├── module.prisma                # Module model
+│   │   ├── course.prisma                # Course model (with createdById & courseModules)
+│   │   ├── module.prisma                # Independent Module model
+│   │   ├── course-module.prisma         # CourseModule association model (many-to-many & ordering)
 │   │   ├── content-item.prisma          # ContentItem model & ContentType enum
-│   │   ├── assignment.prisma            # Assignment model & SubmissionPolicy enum
+│   │   ├── assignment.prisma            # Independent Assignment model & SubmissionPolicy enum
 │   │   ├── submission.prisma            # Submission model & SubmissionStatus enum
 │   │   ├── feedback.prisma              # Feedback model
 │   │   └── rate-limit.prisma            # RateLimitEntry model & indexes
@@ -99,60 +106,34 @@ backend/
 │   │   ├── request-context.ts           # Correlation ID (X-Request-Id) and latency logger
 │   │   └── validate.ts                  # Zod request body/query/params validation middleware
 │   ├── models/
-│   │   └── index.ts                     # Domain entity type re-exports from Prisma
+│   │   └── index.ts                     # Re-exports domain entity types and enums from Prisma
 │   ├── modules/
-│   │   ├── auth/                        # Authentication & authorization module
-│   │   ├── courses/                     # Course module (CRUD, pagination, slug generation)
-│   │   │   ├── courses.controller.ts
-│   │   │   ├── courses.repository.ts
-│   │   │   ├── courses.routes.ts
-│   │   │   ├── courses.schema.ts
-│   │   │   ├── courses.service.ts
-│   │   │   ├── courses.types.ts
-│   │   │   └── index.ts
-│   │   ├── modules/                     # Module management (CRUD, reordering, ordering)
-│   │   │   ├── modules.controller.ts
-│   │   │   ├── modules.repository.ts
-│   │   │   ├── modules.routes.ts
-│   │   │   ├── modules.schema.ts
-│   │   │   ├── modules.service.ts
-│   │   │   ├── modules.types.ts
-│   │   │   └── index.ts
-│   │   ├── content/                     # Content item management (CRUD, reordering, types)
-│   │   │   ├── content.controller.ts
-│   │   │   ├── content.repository.ts
-│   │   │   ├── content.routes.ts
-│   │   │   ├── content.schema.ts
-│   │   │   ├── content.service.ts
-│   │   │   ├── content.types.ts
-│   │   │   └── index.ts
-│   │   ├── health/                      # Health module (liveness & readiness)
-│   │   └── rate-limit/                  # Database-backed rate limiting module
-│   ├── repositories/
-│   │   ├── base.repository.ts           # Generic type-safe CRUD repository
-│   │   └── repository.types.ts          # Delegate types & pagination interfaces
-│   ├── scripts/
-│   │   ├── cleanup-rate-limits.ts       # Bounded batch deletion of expired rate limit entries
-│   │   ├── seed.ts                      # Idempotent mentor and administrator database seeder
-│   │   └── verify-db.ts                 # Direct database connectivity probe
-│   ├── types/
-│   │   └── express.d.ts                 # Express.Request augmentation (req.user, req.id)
+│   │   ├── auth/                        # Signup, login, password hashing & tokens
+│   │   ├── courses/                     # Courses repository, service, controller & routes
+│   │   ├── modules/                     # Independent modules & course-module associations
+│   │   ├── content/                     # Content items CRUD & reordering
+│   │   ├── assignments/                 # Independent assignment management
+│   │   ├── submissions/                 # Submission attempts, policies & concurrency locking
+│   │   ├── health/                      # Public liveness and database readiness probe
+│   │   └── rate-limit/                  # Database-backed rate limiting middleware
 │   └── utils/
-│       ├── pagination.ts                # Safe pagination calculator
-│       └── slug.ts                      # URL slug generator
+│       ├── pagination.ts                # Standardized pagination calculator
+│       └── slug.ts                      # Deterministic URL slug generator
+│
 └── tests/
-    ├── app.test.ts                      # Foundation & health check tests (9 tests)
-    ├── auth.test.ts                     # Auth, Argon2id, JWT, Roles & Seed tests (32 tests)
-    ├── base-repository.test.ts          # Generic repository CRUD tests (8 tests)
-    ├── course-module-content.test.ts    # Course, Module & Content full integration suite (25 tests)
-    ├── rate-limit-db.test.ts            # PostgreSQL concurrency & expiry tests (2 tests)
-    ├── rate-limit.test.ts               # In-memory rate limiting middleware tests (15 tests)
-    └── utils.test.ts                    # Pagination & utility unit tests (5 tests)
+    ├── app.test.ts                      # Express pipeline & correlation ID tests
+    ├── auth.test.ts                     # Signup, login, timing safety & JWT tests
+    ├── base-repository.test.ts          # Generic repository CRUD tests
+    ├── course-module-content.test.ts    # Course, module & content management tests
+    ├── assignments-submissions.test.ts  # Assignments, attempts, policies & concurrency tests
+    ├── rate-limit-db.test.ts            # PostgreSQL concurrency & window tests
+    ├── rate-limit.test.ts               # Rate limit middleware header tests
+    └── utils.test.ts                    # Pagination & utility unit tests
 ```
 
 ---
 
-## 3. Course, Module & Content API Reference
+## 3. Comprehensive API Reference
 
 ### Course Endpoints
 
@@ -162,18 +143,21 @@ backend/
 | `GET` | `/api/v1/courses/:courseId` | Public / Student / Mentor | Retrieves course detail by UUID or slug with nested ordered modules |
 | `POST` | `/api/v1/courses` | `MENTOR`, `ADMIN` | Creates a new course (auto-generates slug if omitted) |
 | `PATCH` | `/api/v1/courses/:courseId` | `MENTOR`, `ADMIN` | Updates course metadata or publication status |
-| `DELETE` | `/api/v1/courses/:courseId` | `MENTOR`, `ADMIN` | Deletes a course and cascades child modules/content |
+| `DELETE` | `/api/v1/courses/:courseId` | `MENTOR`, `ADMIN` | Deletes a course |
 
-### Module Endpoints
+### Module & Course-Module Endpoints
 
 | Method | Endpoint | Authorization | Description |
 |---|---|---|---|
-| `POST` | `/api/v1/courses/:courseId/modules` | `MENTOR`, `ADMIN` | Creates a module (appends to end if `order` omitted) |
-| `GET` | `/api/v1/courses/:courseId/modules` | Public / Student / Mentor | Lists modules for course in deterministic order |
-| `PATCH` | `/api/v1/courses/:courseId/modules/reorder` | `MENTOR`, `ADMIN` | Reorders modules safely within a parent course |
-| `GET` | `/api/v1/modules/:moduleId` | Public / Student / Mentor | Retrieves module detail with ordered content items |
-| `PATCH` | `/api/v1/modules/:moduleId` | `MENTOR`, `ADMIN` | Updates module title, description, or publication status |
-| `DELETE` | `/api/v1/modules/:moduleId` | `MENTOR`, `ADMIN` | Deletes module and cascades its content items |
+| `GET` | `/api/v1/modules` | Public / Student / Mentor | Lists independent modules with pagination |
+| `POST` | `/api/v1/modules` | `MENTOR`, `ADMIN` | Creates an independent module (can later be attached to courses) |
+| `GET` | `/api/v1/modules/:moduleId` | Public / Student / Mentor | Retrieves module detail with attached courses & ordered content items |
+| `PATCH` | `/api/v1/modules/:moduleId` | `MENTOR`, `ADMIN` | Updates independent module title, description, or publication status |
+| `DELETE` | `/api/v1/modules/:moduleId` | `MENTOR`, `ADMIN` | Deletes module (rejected with 409 Conflict if attached to any course) |
+| `POST` | `/api/v1/courses/:courseId/modules` | `MENTOR`, `ADMIN` | Attaches an existing module or creates and attaches a new module |
+| `GET` | `/api/v1/courses/:courseId/modules` | Public / Student / Mentor | Lists modules attached to this course in course-specific order |
+| `DELETE` | `/api/v1/courses/:courseId/modules/:moduleId` | `MENTOR`, `ADMIN` | Detaches module from course (does NOT delete module or its content) |
+| `PATCH` | `/api/v1/courses/:courseId/modules/reorder` | `MENTOR`, `ADMIN` | Two-phase transaction reordering of modules within a course |
 
 ### Content Item Endpoints
 
@@ -186,58 +170,45 @@ backend/
 | `PATCH` | `/api/v1/content/:contentId` | `MENTOR`, `ADMIN` | Updates content title, payload, URL, or type |
 | `DELETE` | `/api/v1/content/:contentId` | `MENTOR`, `ADMIN` | Deletes a content item |
 
----
+### Assignment Endpoints
 
-## 4. Deterministic Ordering & Two-Phase Transaction Safety
-
-Both `Module` and `ContentItem` models have database unique constraints:
-- `@@unique([courseId, order])` on `modules`
-- `@@unique([moduleId, order])` on `content_items`
-
-### The Collision Problem:
-When updating positions in an arbitrary sequence (e.g., swapping items at orders 1 and 2), updating item A to order 1 while item B still occupies order 1 causes PostgreSQL to throw:
-`duplicate key value violates unique constraint "modules_courseId_order_key"`.
-
-### The Two-Phase Update Solution:
-All reorder operations execute inside an atomic database transaction (`prisma.$transaction`):
-1. **Validation**: Confirms the input contains the complete, exact set of IDs for that parent (no missing, no foreign, no duplicates).
-2. **Phase 1 (Temporary Negative Offsets)**: Updates each item's order to `- (index + 1000)`. Because all active orders are positive numbers, negative orders never collide with existing entries or each other.
-3. **Phase 2 (Final Sequential Normalization)**: Updates each item to its final target positive order (`1, 2, 3...`).
-4. **Result**: The final order is 100% deterministic, collision-free, and transactional.
-
-### Append-to-End by Default:
-When a module or content item is created without specifying an order:
-- The system queries `MAX("order")` for that parent.
-- Automatically assigns `order = (maxOrder ?? 0) + 1`.
-
----
-
-## 5. Supported Content Types & Payload Validation
-
-| Type | Required Fields | Validation Rules |
-|---|---|---|
-| `YOUTUBE_VIDEO` | `url` | Must be a valid HTTP/HTTPS URL pointing to YouTube (`youtube.com` or `youtu.be`) or video resource |
-| `VIDEO` | `url` | Must be a valid HTTP or HTTPS video resource URL |
-| `LINK` | `url` | Must be a valid HTTP or HTTPS external URL |
-| `TEXT` | `body` | Must be a non-empty string lesson body |
-| `ASSIGNMENT` | `assignmentId` | Must be a valid UUID referencing an existing `Assignment` in the database |
-
----
-
-## 6. Publication Access Control Matrix
-
-| Action | Student / Public | Mentor | Admin |
+| Method | Endpoint | Authorization | Description |
 |---|---|---|---|
-| List published courses | Yes | Yes | Yes |
-| View published course detail & modules | Yes | Yes | Yes |
-| View draft course / modules / content | **No (Returns 404 Not Found)** | Yes | Yes |
-| Create / Update / Delete courses | **No (403 Forbidden)** | Yes | Yes |
-| Create / Update / Delete / Reorder modules | **No (403 Forbidden)** | Yes | Yes |
-| Create / Update / Delete / Reorder content | **No (403 Forbidden)** | Yes | Yes |
+| `GET` | `/api/v1/assignments` | Public / Student / Mentor | Lists assignments with pagination and publication filtering |
+| `POST` | `/api/v1/assignments` | `MENTOR`, `ADMIN` | Creates an independent assignment (`ONE_TIME` or `RESUBMITTABLE`) |
+| `GET` | `/api/v1/assignments/:assignmentId` | Public / Student / Mentor | Retrieves assignment detail, instructions, and creator details |
+| `PATCH` | `/api/v1/assignments/:assignmentId` | `MENTOR`, `ADMIN` | Updates assignment instructions, due date, or policy |
+| `DELETE` | `/api/v1/assignments/:assignmentId` | `MENTOR`, `ADMIN` | Deletes assignment (rejected with 409 Conflict if submissions exist) |
+
+### Student Submission Endpoints
+
+| Method | Endpoint | Authorization | Description |
+|---|---|---|---|
+| `POST` | `/api/v1/assignments/:assignmentId/submissions` | `STUDENT` | Creates a submission attempt with concurrency-safe atomic locking |
+| `GET` | `/api/v1/assignments/:assignmentId/submissions/me` | `STUDENT` | Retrieves the authenticated student's attempt history and feedbacks |
+| `GET` | `/api/v1/assignments/:assignmentId/submissions` | `MENTOR`, `ADMIN` | Paginated list of student submissions for this assignment |
+| `GET` | `/api/v1/submissions/:submissionId` | Student / Mentor / Admin | Retrieves specific submission detail with mentor reviews (enforces student ownership) |
 
 ---
 
-## 7. Development & Production Commands
+## 4. Concurrency Safety & PostgreSQL Advisory Locking
+
+Submitting assignments requires strict atomicity to prevent race conditions:
+1. **The Race Condition Threat**: Under high load or deliberate rapid double-clicking, two parallel HTTP requests from the same student could pass check queries simultaneously, producing duplicate `attemptNumber` rows or bypassing a `ONE_TIME` submission policy.
+2. **PostgreSQL Advisory Lock Strategy**:
+   Inside an atomic database transaction (`prisma.$transaction`), a transaction-level advisory lock is acquired using a 64-bit hash of the student ID and assignment ID:
+   ```sql
+   SELECT pg_advisory_xact_lock(hashtext('sub:' || :assignmentId || ':' || :studentId));
+   ```
+3. **Serialized Execution**:
+   - The first concurrent request acquires the lock, determines `nextAttemptNumber`, inserts the submission, and commits the transaction (automatically releasing the lock).
+   - The second request waits for the lock, acquires it, discovers existing attempts, and either increments the attempt number sequentially or rejects with `409 Conflict` if the assignment has a `ONE_TIME` policy.
+4. **Database Backstop**:
+   The unique constraint `@@unique([assignmentId, studentId, attemptNumber])` on the `submissions` table guarantees zero duplicate attempts at the relational engine level.
+
+---
+
+## 5. Development & Production Commands
 
 | Command | Action |
 |---|---|
@@ -246,18 +217,10 @@ When a module or content item is created without specifying an order:
 | `npm start` | Executes compiled production server (`node dist/server.js`) |
 | `npm run typecheck` | Validates TypeScript types across the project (`tsc --noEmit`) |
 | `npm run lint` | Runs ESLint across the codebase |
-| `npm test` | Runs all Vitest test suites (96 tests across 7 test files) |
+| `npm test` | Runs all Vitest test suites (112 tests across 8 test files) |
 | `npm run db:seed` | Idempotently provisions initial mentor and admin accounts |
 | `npm run prisma:generate` | Generates Prisma v7 Client into `src/generated/prisma` |
 | `npm run prisma:validate` | Validates multi-file schemas in `prisma/` against `prisma.config.ts` |
 | `npm run prisma:migrate:deploy` | Applies pending migrations in production / CI |
 | `npm run db:check` | Verifies Neon database connectivity (`SELECT 1`) |
 | `npm run db:cleanup-rate-limits` | Runs bounded batch deletion of expired rate limit records |
-
----
-
-## 8. Deferred Behaviors Documented
-
-- **Course Ownership**: Currently, all mentors and administrators share full management access to all courses, modules, and content items. Granular per-mentor ownership or collaboration permissions will be introduced in subsequent phases.
-- **Student Enrollment**: Publicly visible published courses are accessible for reading by all authenticated students. Restricting access to enrolled students only will be governed by the upcoming enrollment module.
-- **Assignment Submissions**: Content items of type `ASSIGNMENT` reference assignments by `assignmentId`. Full assignment attempt histories and mentor review workflows will be handled in the assignment/submission phase.

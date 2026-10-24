@@ -18,6 +18,9 @@ model User {
   submissions         Submission[] @relation("StudentSubmissions")
   reviewedSubmissions Submission[] @relation("MentorReviews")
   feedbacks           Feedback[]   @relation("MentorFeedback")
+  coursesCreated      Course[]     @relation("CourseCreator")
+  modulesCreated      Module[]     @relation("ModuleCreator")
+  assignmentsCreated  Assignment[] @relation("AssignmentCreator")
 
   @@index([role])
   @@index([email])

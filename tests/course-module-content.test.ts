@@ -374,9 +374,15 @@ describe('Phase 6 — Course & Module APIs, Content Management & Ordering', { ti
       expect(res.status).toBe(200);
       expect(res.body.data.title).toBe('Module 1: Renamed Title');
 
-      // Verify in DB that courseId remains unchanged
-      const dbModule = await prisma.module.findUnique({ where: { id: module1Id } });
-      expect(dbModule?.courseId).toBe(courseId);
+      // Verify in DB that module remains attached to courseId and NOT otherCourse
+      const cm = await prisma.courseModule.findUnique({
+        where: { courseId_moduleId: { courseId, moduleId: module1Id } },
+      });
+      expect(cm).not.toBeNull();
+      const otherCm = await prisma.courseModule.findUnique({
+        where: { courseId_moduleId: { courseId: otherCourse.id, moduleId: module1Id } },
+      });
+      expect(otherCm).toBeNull();
     });
 
     it('12. Reordering modules produces the requested sequence ([3, 1, 2]) safely', async () => {
@@ -398,9 +404,15 @@ describe('Phase 6 — Course & Module APIs, Content Management & Ordering', { ti
       expect(reordered[2]?.order).toBe(3);
 
       // Verify in database directly
-      const dbModule3 = await prisma.module.findUnique({ where: { id: module3Id } });
-      const dbModule1 = await prisma.module.findUnique({ where: { id: module1Id } });
-      const dbModule2 = await prisma.module.findUnique({ where: { id: module2Id } });
+      const dbModule3 = await prisma.courseModule.findUnique({
+        where: { courseId_moduleId: { courseId, moduleId: module3Id } },
+      });
+      const dbModule1 = await prisma.courseModule.findUnique({
+        where: { courseId_moduleId: { courseId, moduleId: module1Id } },
+      });
+      const dbModule2 = await prisma.courseModule.findUnique({
+        where: { courseId_moduleId: { courseId, moduleId: module2Id } },
+      });
       expect(dbModule3?.order).toBe(1);
       expect(dbModule1?.order).toBe(2);
       expect(dbModule2?.order).toBe(3);
@@ -430,13 +442,14 @@ describe('Phase 6 — Course & Module APIs, Content Management & Ordering', { ti
     });
 
     it('14. Deleting a module follows documented referential-integrity strategy', async () => {
-      // Create a temporary module to delete
+      // Create a temporary module attached to course
       const tempRes = await request(app)
         .post(`/api/v1/courses/${courseId}/modules`)
         .set('Authorization', `Bearer ${mentorToken}`)
         .set('X-Forwarded-For', getTestIp())
         .send({ title: 'Module To Delete' });
 
+      expect(tempRes.status).toBe(201);
       const tempModuleId = tempRes.body.data.id;
 
       // Add a content item to it
@@ -450,7 +463,23 @@ describe('Phase 6 — Course & Module APIs, Content Management & Ordering', { ti
           body: 'This will cascade delete with module',
         });
 
-      // Delete module
+      // Attempting to delete while attached to a course must fail with 409 Conflict
+      const blockedDelRes = await request(app)
+        .delete(`/api/v1/modules/${tempModuleId}`)
+        .set('Authorization', `Bearer ${mentorToken}`)
+        .set('X-Forwarded-For', getTestIp());
+
+      expect(blockedDelRes.status).toBe(409);
+
+      // Detach module from course first
+      const detachRes = await request(app)
+        .delete(`/api/v1/courses/${courseId}/modules/${tempModuleId}`)
+        .set('Authorization', `Bearer ${mentorToken}`)
+        .set('X-Forwarded-For', getTestIp());
+
+      expect(detachRes.status).toBe(200);
+
+      // Delete detached module succeeds and cascades to its content items
       const delRes = await request(app)
         .delete(`/api/v1/modules/${tempModuleId}`)
         .set('Authorization', `Bearer ${mentorToken}`)
@@ -487,17 +516,15 @@ describe('Phase 6 — Course & Module APIs, Content Management & Ordering', { ti
       const module = await prisma.module.create({
         data: {
           title: 'Content Host Module',
-          courseId,
-          order: 1,
           isPublished: true,
+          courseModules: { create: { courseId, order: 1 } },
         },
       });
       moduleId = module.id;
 
-      // Seed an assignment in this module for ASSIGNMENT content type test
+      // Seed an independent assignment for ASSIGNMENT content type test
       const assignment = await prisma.assignment.create({
         data: {
-          moduleId,
           title: 'Midterm Capstone Project',
           instructions: 'Build a production REST API',
           isPublished: true,
@@ -623,9 +650,8 @@ describe('Phase 6 — Course & Module APIs, Content Management & Ordering', { ti
       const draftModule = await prisma.module.create({
         data: {
           title: 'Draft Module with Content',
-          courseId: draftCourse.id,
-          order: 1,
           isPublished: false,
+          courseModules: { create: { courseId: draftCourse.id, order: 1 } },
         },
       });
 
@@ -749,11 +775,19 @@ describe('Phase 6 — Course & Module APIs, Content Management & Ordering', { ti
       });
       createdCourseIds.push(course.id);
 
-      // Create 4 modules
-      const m1 = await prisma.module.create({ data: { courseId: course.id, title: 'M1', order: 1 } });
-      const m2 = await prisma.module.create({ data: { courseId: course.id, title: 'M2', order: 2 } });
-      const m3 = await prisma.module.create({ data: { courseId: course.id, title: 'M3', order: 3 } });
-      const m4 = await prisma.module.create({ data: { courseId: course.id, title: 'M4', order: 4 } });
+      // Create 4 modules attached to course
+      const m1 = await prisma.module.create({
+        data: { title: 'M1', courseModules: { create: { courseId: course.id, order: 1 } } },
+      });
+      const m2 = await prisma.module.create({
+        data: { title: 'M2', courseModules: { create: { courseId: course.id, order: 2 } } },
+      });
+      const m3 = await prisma.module.create({
+        data: { title: 'M3', courseModules: { create: { courseId: course.id, order: 3 } } },
+      });
+      const m4 = await prisma.module.create({
+        data: { title: 'M4', courseModules: { create: { courseId: course.id, order: 4 } } },
+      });
 
       // Invert the order: [m4, m3, m2, m1]
       const reorderRes = await request(app)
