@@ -6,6 +6,8 @@ interface LogContext {
 
 const SENSITIVE_KEYS = new Set([
   'password',
+  'passwordhash',
+  'password_hash',
   'token',
   'authorization',
   'auth',

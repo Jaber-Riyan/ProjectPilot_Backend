@@ -12,6 +12,16 @@ export interface PaginationCalculation {
   hasPrevPage: boolean;
 }
 
+export interface PaginatedResult<T> {
+  items: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+}
+
 export function calculatePagination(
   params: PaginationParams,
   totalItems: number,
@@ -32,5 +42,21 @@ export function calculatePagination(
     totalPages,
     hasNextPage: page < totalPages,
     hasPrevPage: page > 1,
+  };
+}
+
+export function buildPaginatedResult<T>(
+  items: T[],
+  total: number,
+  pagination: PaginationCalculation
+): PaginatedResult<T> {
+  return {
+    items,
+    total,
+    page: pagination.page,
+    limit: pagination.limit,
+    totalPages: pagination.totalPages,
+    hasNextPage: pagination.hasNextPage,
+    hasPrevPage: pagination.hasPrevPage,
   };
 }

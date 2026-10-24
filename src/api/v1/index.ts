@@ -7,6 +7,7 @@ import { contentRoutes } from '../../modules/content/content.routes';
 import { assignmentRoutes } from '../../modules/assignments/assignments.routes';
 import { submissionRoutes } from '../../modules/submissions/submissions.routes';
 import { mentorSubmissionRoutes } from '../../modules/reviews/reviews.routes';
+import { dashboardRoutes } from '../../modules/dashboard/dashboard.routes';
 import { createRateLimiter } from '../../modules/rate-limit';
 
 const router = Router();
@@ -31,6 +32,7 @@ router.use('/content', contentRoutes);
 router.use('/assignments', assignmentRoutes);
 router.use('/submissions', submissionRoutes);
 router.use('/mentor/submissions', mentorSubmissionRoutes);
+router.use('/dashboard', dashboardRoutes);
 
 export const v1ApiRouter = router;
 export default router;
