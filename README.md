@@ -57,6 +57,14 @@ ProjectPilot LMS is a platform designed for students and mentors to manage cours
   - **Student Submissions & Policies**: First-class support for `ONE_TIME` (single attempt strictly enforced) and `RESUBMITTABLE` (sequential attempts) policies.
   - **Concurrency Safety via PostgreSQL Advisory Locks**: Submission creation acquires transaction-level advisory locks (`pg_advisory_xact_lock(hashtext('sub:' || assignmentId || ':' || studentId))`), serializing concurrent attempts from the same student and preventing duplicate attempt numbers and policy bypasses.
   - **Audit & Feedback History Preservation**: Resubmissions generate new attempt records (`attemptNumber = 2, 3...`), preserving previous attempts and their associated mentor review feedback records.
+- **Phase 8: Review APIs: Mentor Feedback, Approval/Rejection & Protected Status Transitions**
+  - **Authorized Review Queue**: Mentors retrieve submission queues scoped strictly to assignments they authored (`assignment.createdById === user.id`), while administrators have universal queue access (`GET /api/v1/mentor/submissions`).
+  - **Submission Detail Inspection**: Detailed view with student info, assignment metadata, attempt number, and prior feedback (`GET /api/v1/mentor/submissions/:submissionId`).
+  - **Protected Status State Machine**: Strict transition validations preventing illegal status jumps (e.g. `PENDING` directly to arbitrary states, or escaping terminal `APPROVED`).
+  - **Submission Policy Enforcement**: Rejecting resubmission requests (`RESUBMISSION_REQUESTED`) if the assignment enforces a `ONE_TIME` policy (`409 Conflict` with `RESUBMISSION_NOT_ALLOWED`).
+  - **Mandatory Feedback Rules**: Feedback is strictly required when rejecting (`REJECTED`) or requesting resubmission (`RESUBMISSION_REQUESTED`) (`400 Bad Request` with `FEEDBACK_REQUIRED`).
+  - **PostgreSQL Advisory Locking for Reviews**: Atomic reviews with `pg_advisory_xact_lock(hashtext('review:' || submissionId))` serializing concurrent review actions and preventing race conditions.
+  - **Full History Preservation**: Previous submission attempts and their mentor feedbacks remain immutable when subsequent student resubmissions are created.
 
 ---
 
@@ -114,6 +122,7 @@ backend/
 │   │   ├── content/                     # Content items CRUD & reordering
 │   │   ├── assignments/                 # Independent assignment management
 │   │   ├── submissions/                 # Submission attempts, policies & concurrency locking
+│   │   ├── reviews/                     # Mentor reviews, evaluations, feedback & queue
 │   │   ├── health/                      # Public liveness and database readiness probe
 │   │   └── rate-limit/                  # Database-backed rate limiting middleware
 │   └── utils/
@@ -126,6 +135,7 @@ backend/
     ├── base-repository.test.ts          # Generic repository CRUD tests
     ├── course-module-content.test.ts    # Course, module & content management tests
     ├── assignments-submissions.test.ts  # Assignments, attempts, policies & concurrency tests
+    ├── reviews.test.ts                  # Review queue, status transitions, policies & advisory locks
     ├── rate-limit-db.test.ts            # PostgreSQL concurrency & window tests
     ├── rate-limit.test.ts               # Rate limit middleware header tests
     └── utils.test.ts                    # Pagination & utility unit tests
@@ -189,26 +199,59 @@ backend/
 | `GET` | `/api/v1/assignments/:assignmentId/submissions` | `MENTOR`, `ADMIN` | Paginated list of student submissions for this assignment |
 | `GET` | `/api/v1/submissions/:submissionId` | Student / Mentor / Admin | Retrieves specific submission detail with mentor reviews (enforces student ownership) |
 
----
+### Mentor Review & Evaluation Endpoints
 
-## 4. Concurrency Safety & PostgreSQL Advisory Locking
-
-Submitting assignments requires strict atomicity to prevent race conditions:
-1. **The Race Condition Threat**: Under high load or deliberate rapid double-clicking, two parallel HTTP requests from the same student could pass check queries simultaneously, producing duplicate `attemptNumber` rows or bypassing a `ONE_TIME` submission policy.
-2. **PostgreSQL Advisory Lock Strategy**:
-   Inside an atomic database transaction (`prisma.$transaction`), a transaction-level advisory lock is acquired using a 64-bit hash of the student ID and assignment ID:
-   ```sql
-   SELECT pg_advisory_xact_lock(hashtext('sub:' || :assignmentId || ':' || :studentId));
-   ```
-3. **Serialized Execution**:
-   - The first concurrent request acquires the lock, determines `nextAttemptNumber`, inserts the submission, and commits the transaction (automatically releasing the lock).
-   - The second request waits for the lock, acquires it, discovers existing attempts, and either increments the attempt number sequentially or rejects with `409 Conflict` if the assignment has a `ONE_TIME` policy.
-4. **Database Backstop**:
-   The unique constraint `@@unique([assignmentId, studentId, attemptNumber])` on the `submissions` table guarantees zero duplicate attempts at the relational engine level.
+| Method | Endpoint | Authorization | Description |
+|---|---|---|---|
+| `GET` | `/api/v1/mentor/submissions` | `MENTOR`, `ADMIN` | Paginated review queue scoped to authored assignments (admins see all) with status/assignment filters |
+| `GET` | `/api/v1/mentor/submissions/:submissionId` | `MENTOR`, `ADMIN` | Detailed submission inspection for review (enforces assignment author ownership) |
+| `POST` | `/api/v1/submissions/:submissionId/review` | `MENTOR`, `ADMIN` | Applies review decision (`UNDER_REVIEW`, `APPROVED`, `REJECTED`, `RESUBMISSION_REQUESTED`) with feedback |
+| `PATCH` | `/api/v1/submissions/:submissionId/review` | `MENTOR`, `ADMIN` | Updates existing review status or feedback notes |
 
 ---
 
-## 5. Development & Production Commands
+## 4. Protected Review State Machine & Lifecycle
+
+The review system implements a formal, non-bypassable state machine governing submission statuses:
+
+### Allowed State Transitions
+
+| Current Status | Allowed Target Statuses | Notes & Invariants |
+|---|---|---|
+| `PENDING` | `UNDER_REVIEW`, `APPROVED`, `REJECTED`, `RESUBMISSION_REQUESTED` | Initial state upon student submission. |
+| `UNDER_REVIEW` | `APPROVED`, `REJECTED`, `RESUBMISSION_REQUESTED` | Reviewer is actively evaluating the attempt. |
+| `REJECTED` | `RESUBMISSION_REQUESTED` | Permitted only if the assignment policy is `RESUBMITTABLE`. |
+| `RESUBMISSION_REQUESTED` | None (Terminal for this attempt) | Awaiting student action; resubmitting creates a new attempt record with `PENDING` status. |
+| `APPROVED` | None (Terminal state) | Fully accepted submission; cannot transition to any other status. |
+
+### Business Rules & Constraints
+1. **Assignment Ownership Enforcement**: Mentors can only view and evaluate submissions for assignments they authored (`assignment.createdById === user.id`). Administrators have universal review authorization across all assignments.
+2. **Resubmission Policy Guard**: Attempting to set `RESUBMISSION_REQUESTED` on an assignment with `submissionPolicy: ONE_TIME` is rejected with `409 Conflict` (`RESUBMISSION_NOT_ALLOWED`).
+3. **Mandatory Written Feedback**: Transitions to `REJECTED` or `RESUBMISSION_REQUESTED` strictly require non-empty written feedback (`400 Bad Request` with `FEEDBACK_REQUIRED`). Feedback on `APPROVED` is optional.
+4. **Historical Immutability**: When a student resubmits, a new attempt row is inserted (`attemptNumber = n + 1`). Prior attempts and their associated `Feedback` records remain immutable and visible in the attempt history.
+
+---
+
+## 5. Concurrency Safety & PostgreSQL Advisory Locking
+
+Both submission creation and mentor evaluation workflows enforce strict serialization using PostgreSQL transaction-level advisory locks:
+
+### 1. Submission Concurrency Lock
+```sql
+SELECT pg_advisory_xact_lock(hashtext('sub:' || :assignmentId || ':' || :studentId));
+```
+- **Guarantees**: Prevents race conditions during rapid multi-click submissions by the same student. Computes sequential `attemptNumber` and enforces `ONE_TIME` constraints atomically.
+- **Relational Backstop**: `@@unique([assignmentId, studentId, attemptNumber])` in PostgreSQL.
+
+### 2. Review Concurrency Lock
+```sql
+SELECT pg_advisory_xact_lock(hashtext('review:' || :submissionId));
+```
+- **Guarantees**: Serializes concurrent reviews targeting the same submission attempt. Prevents conflicting simultaneous updates (e.g., conflicting `APPROVED` vs `REJECTED` decisions) and ensures atomic state machine transitions and feedback creation.
+
+---
+
+## 6. Development & Production Commands
 
 | Command | Action |
 |---|---|
@@ -217,7 +260,7 @@ Submitting assignments requires strict atomicity to prevent race conditions:
 | `npm start` | Executes compiled production server (`node dist/server.js`) |
 | `npm run typecheck` | Validates TypeScript types across the project (`tsc --noEmit`) |
 | `npm run lint` | Runs ESLint across the codebase |
-| `npm test` | Runs all Vitest test suites (112 tests across 8 test files) |
+| `npm test` | Runs all Vitest test suites (130 tests across 9 test files) |
 | `npm run db:seed` | Idempotently provisions initial mentor and admin accounts |
 | `npm run prisma:generate` | Generates Prisma v7 Client into `src/generated/prisma` |
 | `npm run prisma:validate` | Validates multi-file schemas in `prisma/` against `prisma.config.ts` |

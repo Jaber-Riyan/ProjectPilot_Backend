@@ -30,8 +30,10 @@ export type ContentType = (typeof ContentType)[keyof typeof ContentType]
 
 export const SubmissionStatus = {
   PENDING: 'PENDING',
+  UNDER_REVIEW: 'UNDER_REVIEW',
   APPROVED: 'APPROVED',
-  REJECTED: 'REJECTED'
+  REJECTED: 'REJECTED',
+  RESUBMISSION_REQUESTED: 'RESUBMISSION_REQUESTED'
 } as const
 
 export type SubmissionStatus = (typeof SubmissionStatus)[keyof typeof SubmissionStatus]

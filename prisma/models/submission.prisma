@@ -1,7 +1,9 @@
 enum SubmissionStatus {
   PENDING
+  UNDER_REVIEW
   APPROVED
   REJECTED
+  RESUBMISSION_REQUESTED
 }
 
 model Submission {
