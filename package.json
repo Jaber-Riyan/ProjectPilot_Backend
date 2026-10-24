@@ -42,7 +42,10 @@
     "zod": "^4.6.7"
   },
   "allowScripts": {
-    "esbuild": true
+    "esbuild": true,
+    "@prisma/engines@7.10.1": true,
+    "argon2@0.45.1": true,
+    "prisma@7.10.1": true
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
